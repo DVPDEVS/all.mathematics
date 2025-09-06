@@ -91,22 +91,48 @@ class UInt4096:
 			self.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
 		return self
 
-	def __truediv__(self, other: UInt4096)->UInt4096:
+	def __truediv__(self, other: UInt4096)->UInt4096: #I am unsure how this will be done with the current methods of doing arithmetic - Smol
 		return self
 
-	def __itruediv__(self, other: UInt4096)->UInt4096:
+	def __itruediv__(self, other: UInt4096)->UInt4096: 
 		return self
 
-	def __floordiv__(self, other: UInt4096)->UInt4096:\
-		return self
+	def __floordiv__(self, other: UInt4096)->UInt4096:
+		res = UInt4096()
+		for i in range(128):
+			try:
+				total = int(self.chunks[i]) // int(other.chunks[i])
+			except ZeroDivisionError:
+				total = 0
+			res.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
+		return res
 
-	def __ifloordiv__(self, other: UInt4096)->UInt4096:\
+	def __ifloordiv__(self, other: UInt4096)->UInt4096:
+		for i in range(128):
+			try:
+				total = int(self.chunks[i]) // int(other.chunks[i])
+			except ZeroDivisionError:
+				total = 0
+			self.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
 		return self
 
 	def __mod__(self, other: UInt4096)->UInt4096:
-		return self
+		res = UInt4096()
+		for i in range(128):
+			try:
+				total = int(self.chunks[i]) % int(other.chunks[i])
+			except ZeroDivisionError:
+				total = 0
+			res.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
+		return res
 
 	def __imod__(self, other: UInt4096)->UInt4096:
+		for i in range(128):
+			try:
+				total = int(self.chunks[i]) % int(other.chunks[i])
+			except ZeroDivisionError:
+				total = 0
+			self.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
 		return self
 
 	def __pow__(self, other: UInt4096)->UInt4096:
@@ -122,6 +148,9 @@ class UInt4096:
 		return self
 
 	def __abs__(self)->UInt4096:
+		for i in range(128):
+			total=abs(int(self.chunks[i]))
+			self.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
 		return self
 
 	def __and__(self)->UInt4096:
