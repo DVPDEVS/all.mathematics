@@ -277,14 +277,10 @@ class Float4096:
 			i += 1
 
 	def _to_int(self)->int:
-		res = 0
-		for i in reversed(range(128)):
-			res <<= 64
-			res |= self.mantissa[i]
-		return res
+		return self
 
 	def __repr__(self):
-		return f"UInt1024({self._to_int()})"
+		return f"Float4096({''})"
 
 	def __add__(self, other: Float4096)->Float4096:
 		return res
@@ -389,7 +385,11 @@ class Float4096:
 		return self
 
 	def __int__(self)->int:
-		return self._to_int()
+		chunk_size = self.mantissa.itemsize * 8
+		value = 0
+		for i in range(len(self.mantissa) - 1, -1, -1):
+			value = (value << chunk_size) | int(self.mantissa[i])
+		return value if getattr(self, "sign", 1) >= 0 else -value
 
 	def __bool__(self)->bool:
 		...
@@ -404,7 +404,24 @@ class Float4096:
 		return self
 
 	def __len__(self)->int:
-		return len(str(self))
+		chunk_size = self.mantissa.itemsize * 8
+		for i in range(len(self.mantissa)-1, -1, -1):
+			chunk = int(self.mantissa[i])
+			if chunk != 0:
+				return i * chunk_size
+		return 0
+
+	def _normalize(self):
+		bitcount = len(self.mantissa)
+		if bitcount == 0:
+			self.exponent = 0
+			self.sign = 1
+			return
+		max_bits = len(self.mantissa) * 8 * self.mantissa.itemsize
+		shift = max_bits - bitcount
+		if shift > 0:
+			self.mantissa <<= shift
+			self.exponent -= 1
 
 	def __getitem__(self)-> Union[np.bool_, np.uint8, np.uint16, np.uint32, np.uint64]:
 		...
@@ -432,7 +449,27 @@ class MathF:
 	bit32types = (UInt4096H, UInt2048H, UInt1024H, UInt512H, UInt256H, UInt128H, Int4096H, Int2048H, Int1024H, Int512H, Int256H, Int128H,
 	Float4096H, Float2048H, Float1024H, Float512H, Float256H, Float128H)
 
-	def frexp(bigint):
+	bigIntsUnion64 = Union[UInt4096, UInt2048, UInt1024, UInt512, UInt256, UInt128, Int4096, Int2048, Int1024, Int512, Int256, Int128]
+
+	bigFloatsUnion64 = Union[Float4096, Float2048, Float1024, Float512, Float256, Float128]
+
+	bigIntsUnion32 = Union[UInt4096H, UInt2048H, UInt1024H, UInt512H, UInt256H, UInt128H, Int4096H, Int2048H, Int1024H, Int512H, Int256H, Int128H]
+
+	bigFloatsUnion32 = Union[Float4096H, Float2048H, Float1024H, Float512H, Float256H, Float128H]
+
+	def frexp(bigint: MathF.bigIntsUnion64|MathF.bigIntsUnion32):
+		"""Convert a bigint type to a floating point type. Returns the mantissa and exponent"""
+		bitcount = len(bigint)
+		if bitcount == 0:
+			return bigint, 0
+		chunk_size = bigint.chunks.itemsize * 8
+		max_bits = len(bigint.chunks) * chunk_size
+		shift = max_bits - bitcount
+		normalized = bigint << shift
+		exponent = bitcount
+		return normalized, exponent
+
+
 		if isinstance(bigint, MathF.bit64types):
 			return len(bigint)*64
 		elif isinstance(bigint, MathF.bit32types):
