@@ -149,12 +149,6 @@ class UInt8192:
 	def __pos__(self)->UInt8192:
 		return self
 
-	def __abs__(self)->UInt8192:
-		for i in range(128):
-			total=abs(int(self.chunks[i]))
-			self.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
-		return self
-
 	def __and__(self)->UInt8192:
 		return self
 

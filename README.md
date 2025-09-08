@@ -11,6 +11,7 @@ Note our usage of other libraries when applicable :3
 
 - 64 Bit
   - UInt
+    - UInt8192
     - UInt4096
     - UInt2048
     - UInt1024
@@ -18,6 +19,7 @@ Note our usage of other libraries when applicable :3
     - UInt256
     - UInt128
   - Int
+    - Int8192
     - Int4096
     - Int2048
     - Int1024
@@ -25,6 +27,7 @@ Note our usage of other libraries when applicable :3
     - Int256
     - Int128
   - Float
+    - Float8192
     - Float4096
     - Float2048
     - Float1024
@@ -33,6 +36,7 @@ Note our usage of other libraries when applicable :3
     - Float128
 - 32 Bit
   - UInt
+    - UInt8192H
     - UInt4096H
     - UInt2048H
     - UInt1024H
@@ -40,6 +44,7 @@ Note our usage of other libraries when applicable :3
     - UInt256H
     - UInt128H
   - Int
+    - Int8192H
     - Int4096H
     - Int2048H
     - Int1024H
@@ -47,6 +52,7 @@ Note our usage of other libraries when applicable :3
     - Int256H
     - Int128H
   - Float
+    - Float8192H
     - Float4096H
     - Float2048H
     - Float1024H
@@ -99,19 +105,19 @@ Note our usage of other libraries when applicable :3
     
       | Value (bits 31...27) | Value in decimal | Type                | Reserved bits for index value |
       |----------------------|------------------|---------------------|-------------------------------|
-      | 0b0000               | 0                | Bit                 | 15 ... 0                      |
-      | 0b0001               | 1                | Nybble              | 14 ... 0                      |
-      | 0b0010               | 2                | Byte                | 13 ... 0                      |
-      | 0b0011               | 3                | Word                | 12 ... 0                      |
-      | 0b0100               | 4                | DWord               | 11 ... 0                      |
-      | 0b0101               | 5                | Qword               | 10 ... 0                      |
-      | 0b0110               | 6                | UInt128 \| Int128   | 9  ... 0                      |
-      | 0b0111               | 7                | UInt256 \| Int256   | 8  ... 0                      |
-      | 0b1000               | 8                | UInt512 \| Int512   | 7  ... 0                      |
-      | 0b1001               | 9                | UInt1024 \| Int1024 | 6  ... 0                      |
-      | 0b1010               | 10               | UInt2048 \| Int2048 | 5  ... 0                      |
-      | 0b1011               | 11               | UInt4096 \| Int4096 | 4  ... 0                      |
-      | 0b1100...0b1111      | 12-15            | Reserved            | 0                             |
+      | 0b00000              | 0                | Bit                 | 15 ... 0                      |
+      | 0b00001              | 1                | Nybble              | 14 ... 0                      |
+      | 0b00010              | 2                | Byte                | 13 ... 0                      |
+      | 0b00011              | 3                | Word                | 12 ... 0                      |
+      | 0b00100              | 4                | DWord               | 11 ... 0                      |
+      | 0b00101              | 5                | Qword               | 10 ... 0                      |
+      | 0b00110              | 6                | UInt128 \| Int128   | 9  ... 0                      |
+      | 0b00111              | 7                | UInt256 \| Int256   | 8  ... 0                      |
+      | 0b01000              | 8                | UInt512 \| Int512   | 7  ... 0                      |
+      | 0b01001              | 9                | UInt1024 \| Int1024 | 6  ... 0                      |
+      | 0b01010              | 10               | UInt2048 \| Int2048 | 5  ... 0                      |
+      | 0b01011              | 11               | UInt4096 \| Int4096 | 4  ... 0                      |
+      | 0b01100...0b01111    | 12-15            | Reserved            | 0                             |
   
   - Slice
   - Ellipses  
