@@ -5,7 +5,7 @@ from typing import Union
 from fontTools.ttLib.tables.otConverters import UInt8
 
 # Custom type for storing 1024 byte unsigned integers
-class UInt4096:
+class UInt8192:
 	"""This is a fixed-size unsigned 8192-bit integer type. It IMMEDIATELY takes 1KB of ram."""
 
 	MAX = (1 << 1024) -1
@@ -42,8 +42,8 @@ class UInt4096:
 	def __repr__(self):
 		return f"UInt1024({self._to_int()})"
 
-	def __add__(self, other: UInt4096)->UInt4096:
-		res = UInt4096()
+	def __add__(self, other: UInt8192)->UInt8192:
+		res = UInt8192()
 		carry = 0
 		for i in range(128):
 			total = int(self.chunks[i]) + int(other.chunks[i]) + carry
@@ -52,7 +52,7 @@ class UInt4096:
 		if carry != 0: raise OverflowError
 		return res
 
-	def __iadd__(self, other: UInt4096)->UInt4096:
+	def __iadd__(self, other: UInt8192)->UInt8192:
 		carry = 0
 		for i in range(128):
 			total = int(self.chunks[i]) + int(other.chunks[i]) + carry
@@ -61,8 +61,8 @@ class UInt4096:
 		if carry != 0: raise OverflowError
 		return self
 
-	def __mul__(self, other: UInt4096)->UInt4096:
-		res = UInt4096()
+	def __mul__(self, other: UInt8192)->UInt8192:
+		res = UInt8192()
 		carry = 0
 		for i in range(128):
 			total = int(self.chunks[i]) * int(other.chunks[i]) + carry
@@ -71,7 +71,7 @@ class UInt4096:
 		if carry != 0: raise OverflowError
 		return res
 
-	def __imul__(self, other: UInt4096)->UInt4096:
+	def __imul__(self, other: UInt8192)->UInt8192:
 		carry = 0
 		for i in range(128):
 			total = int(self.chunks[i]) * int(other.chunks[i]) + carry
@@ -80,27 +80,27 @@ class UInt4096:
 		if carry != 0: raise OverflowError
 		return self
 
-	def __sub__(self, other: UInt4096)->UInt4096:
-		res = UInt4096()
+	def __sub__(self, other: UInt8192)->UInt8192:
+		res = UInt8192()
 		for i in range(128):
 			total = int(self.chunks[i]) - int(other.chunks[i])
 			res.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
 		return res
 
-	def __isub__(self, other: UInt4096)->UInt4096:
+	def __isub__(self, other: UInt8192)->UInt8192:
 		for i in range(128):
 			total = int(self.chunks[i]) - int(other.chunks[i])
 			self.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
 		return self
 
-	def __truediv__(self, other: UInt4096)->UInt4096: #I am unsure how this will be done with the current methods of doing arithmetic - Smol
+	def __truediv__(self, other: UInt8192)->UInt8192: #I am unsure how this will be done with the current methods of doing arithmetic - Smol
 		return self
 
-	def __itruediv__(self, other: UInt4096)->UInt4096: 
+	def __itruediv__(self, other: UInt8192)->UInt8192:
 		return self
 
-	def __floordiv__(self, other: UInt4096)->UInt4096:
-		res = UInt4096()
+	def __floordiv__(self, other: UInt8192)->UInt8192:
+		res = UInt8192()
 		for i in range(128):
 			try:
 				total = int(self.chunks[i]) // int(other.chunks[i])
@@ -109,7 +109,7 @@ class UInt4096:
 			res.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
 		return res
 
-	def __ifloordiv__(self, other: UInt4096)->UInt4096:
+	def __ifloordiv__(self, other: UInt8192)->UInt8192:
 		for i in range(128):
 			try:
 				total = int(self.chunks[i]) // int(other.chunks[i])
@@ -118,8 +118,8 @@ class UInt4096:
 			self.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
 		return self
 
-	def __mod__(self, other: UInt4096)->UInt4096:
-		res = UInt4096()
+	def __mod__(self, other: UInt8192)->UInt8192:
+		res = UInt8192()
 		for i in range(128):
 			try:
 				total = int(self.chunks[i]) % int(other.chunks[i])
@@ -128,7 +128,7 @@ class UInt4096:
 			res.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
 		return res
 
-	def __imod__(self, other: UInt4096)->UInt4096:
+	def __imod__(self, other: UInt8192)->UInt8192:
 		for i in range(128):
 			try:
 				total = int(self.chunks[i]) % int(other.chunks[i])
@@ -137,91 +137,91 @@ class UInt4096:
 			self.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
 		return self
 
-	def __pow__(self, other: UInt4096)->UInt4096:
+	def __pow__(self, other: UInt8192)->UInt8192:
 		return self
 
-	def __ipow__(self, other: UInt4096)->UInt4096:
+	def __ipow__(self, other: UInt8192)->UInt8192:
 		return self
 
-	def __neg__(self)->UInt4096:
+	def __neg__(self)->UInt8192:
 		return self
 
-	def __pos__(self)->UInt4096:
+	def __pos__(self)->UInt8192:
 		return self
 
-	def __abs__(self)->UInt4096:
+	def __abs__(self)->UInt8192:
 		for i in range(128):
 			total=abs(int(self.chunks[i]))
 			self.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
 		return self
 
-	def __and__(self)->UInt4096:
+	def __and__(self)->UInt8192:
 		return self
 
-	def __or__(self)->UInt4096:
+	def __or__(self)->UInt8192:
 		return self
 
-	def __xor__(self)->UInt4096:
+	def __xor__(self)->UInt8192:
 		return self
 
-	def __lshift__(self)->UInt4096:
+	def __lshift__(self)->UInt8192:
 		return self
 
-	def __rshift__(self)->UInt4096:
+	def __rshift__(self)->UInt8192:
 		return self
 
-	def __iand__(self)->UInt4096:
+	def __iand__(self)->UInt8192:
 		return self
 
-	def __ior__(self)->UInt4096:
+	def __ior__(self)->UInt8192:
 		return self
 
-	def __ixor__(self)->UInt4096:
+	def __ixor__(self)->UInt8192:
 		return self
 
-	def __ilshift__(self)->UInt4096:
+	def __ilshift__(self)->UInt8192:
 		return self
 
-	def __irshift__(self)->UInt4096:
+	def __irshift__(self)->UInt8192:
 		return self
 
-	def __eq__(self, other: UInt4096)->bool:
+	def __eq__(self, other: UInt8192)->bool:
 		for i in range(128):
 			if int(self.chunks[i]) != int(other.chunks[i]):
 				return False
 		return True
 
-	def __ne__(self, other: UInt4096)->bool:
+	def __ne__(self, other: UInt8192)->bool:
 		for i in range(128):
 			if int(self.chunks[i]) != int(other.chunks[i]):
 				return False
 		return True
 
-	def __lt__(self, other: UInt4096)->bool:
+	def __lt__(self, other: UInt8192)->bool:
 		for i in range(128):
 			if int(self.chunks[i]) != int(other.chunks[i]):
 				return False
 		return True
 
-	def __le__(self, other: UInt4096)->bool:
+	def __le__(self, other: UInt8192)->bool:
 		for i in range(128):
 			if int(self.chunks[i]) != int(other.chunks[i]):
 				return False
 		return True
 
-	def __gt__(self, other: UInt4096)->bool:
+	def __gt__(self, other: UInt8192)->bool:
 		for i in range(128):
 			if int(self.chunks[i]) != int(other.chunks[i]):
 				return False
 		return True
 
-	def __ge__(self, other: UInt4096)->bool:
+	def __ge__(self, other: UInt8192)->bool:
 		for i in range(128):
 			if int(self.chunks[i]) != int(other.chunks[i]):
 				return False
 		return True
 
-	def __del__(self)->UInt4096:
+	def __del__(self)->UInt8192:
 		return self
 
 	def __int__(self)->int:
@@ -245,20 +245,20 @@ class UInt4096:
 	def __getitem__(self)-> Union[np.bool_, np.uint8, np.uint16, np.uint32, np.uint64]:
 		...
 
-	def __setitem__(self)->UInt4096:
+	def __setitem__(self)->UInt8192:
 		return self
 
 	def __contains__(self)->bool:
 		return self
 
-	def __copy__(self)->UInt4096:
+	def __copy__(self)->UInt8192:
 		return self
 
 	def __sizeof__(self)->int:
 		return self
 
 # Custom type for storing 1024 byte floats
-class Float4096:
+class Float8192:
 	"""This is a fixed-size signed 8192-bit float type. It IMMEDIATELY takes 1KB of ram."""
 
 	MAX = (1 << 1024) -1
@@ -280,108 +280,108 @@ class Float4096:
 		return self
 
 	def __repr__(self):
-		return f"Float4096({''})"
+		return f"Float8192({''})"
 
-	def __add__(self, other: Float4096)->Float4096:
+	def __add__(self, other: Float8192)->Float8192:
 		return res
 
-	def __iadd__(self, other: Float4096)->Float4096:
+	def __iadd__(self, other: Float8192)->Float8192:
 		return self
 
-	def __mul__(self, other: Float4096)->Float4096:
+	def __mul__(self, other: Float8192)->Float8192:
 		return res
 
-	def __imul__(self, other: Float4096)->Float4096:
+	def __imul__(self, other: Float8192)->Float8192:
 		return self
 
-	def __sub__(self, other: Float4096)->Float4096:
+	def __sub__(self, other: Float8192)->Float8192:
 		return res
 
-	def __isub__(self, other: Float4096)->Float4096:
+	def __isub__(self, other: Float8192)->Float8192:
 		return self
 
-	def __truediv__(self, other: Float4096)->Float4096:
+	def __truediv__(self, other: Float8192)->Float8192:
 		return self
 
-	def __itruediv__(self, other: Float4096)->Float4096:
+	def __itruediv__(self, other: Float8192)->Float8192:
 		return self
 
-	def __floordiv__(self, other: Float4096)->Float4096:\
+	def __floordiv__(self, other: Float8192)->Float8192:\
 		return self
 
-	def __ifloordiv__(self, other: Float4096)->Float4096:\
+	def __ifloordiv__(self, other: Float8192)->Float8192:\
 		return self
 
-	def __mod__(self, other: Float4096)->Float4096:
+	def __mod__(self, other: Float8192)->Float8192:
 		return self
 
-	def __imod__(self, other: Float4096)->Float4096:
+	def __imod__(self, other: Float8192)->Float8192:
 		return self
 
-	def __pow__(self, other: Float4096)->Float4096:
+	def __pow__(self, other: Float8192)->Float8192:
 		return self
 
-	def __ipow__(self, other: Float4096)->Float4096:
+	def __ipow__(self, other: Float8192)->Float8192:
 		return self
 
-	def __neg__(self)->Float4096:
+	def __neg__(self)->Float8192:
 		return self
 
-	def __pos__(self)->Float4096:
+	def __pos__(self)->Float8192:
 		return self
 
-	def __abs__(self)->Float4096:
+	def __abs__(self)->Float8192:
 		return self
 
-	def __and__(self)->Float4096:
+	def __and__(self)->Float8192:
 		return self
 
-	def __or__(self)->Float4096:
+	def __or__(self)->Float8192:
 		return self
 
-	def __xor__(self)->Float4096:
+	def __xor__(self)->Float8192:
 		return self
 
-	def __lshift__(self)->Float4096:
+	def __lshift__(self)->Float8192:
 		return self
 
-	def __rshift__(self)->Float4096:
+	def __rshift__(self)->Float8192:
 		return self
 
-	def __iand__(self)->Float4096:
+	def __iand__(self)->Float8192:
 		return self
 
-	def __ior__(self)->Float4096:
+	def __ior__(self)->Float8192:
 		return self
 
-	def __ixor__(self)->Float4096:
+	def __ixor__(self)->Float8192:
 		return self
 
-	def __ilshift__(self)->Float4096:
+	def __ilshift__(self)->Float8192:
 		return self
 
-	def __irshift__(self)->Float4096:
+	def __irshift__(self)->Float8192:
 		return self
 
-	def __eq__(self, other: Float4096)->bool:
+	def __eq__(self, other: Float8192)->bool:
 		return True
 
-	def __ne__(self, other: Float4096)->bool:
+	def __ne__(self, other: Float8192)->bool:
 		return True
 
-	def __lt__(self, other: Float4096)->bool:
+	def __lt__(self, other: Float8192)->bool:
 		return True
 
-	def __le__(self, other: Float4096)->bool:
+	def __le__(self, other: Float8192)->bool:
 		return True
 
-	def __gt__(self, other: Float4096)->bool:
+	def __gt__(self, other: Float8192)->bool:
 		return True
 
-	def __ge__(self, other: Float4096)->bool:
+	def __ge__(self, other: Float8192)->bool:
 		return True
 
-	def __del__(self)->Float4096:
+	def __del__(self)->Float8192:
 		return self
 
 	def __int__(self)->int:
@@ -426,13 +426,13 @@ class Float4096:
 	def __getitem__(self)-> Union[np.bool_, np.uint8, np.uint16, np.uint32, np.uint64]:
 		...
 
-	def __setitem__(self)->Float4096:
+	def __setitem__(self)->Float8192:
 		return self
 
 	def __contains__(self)->bool:
 		return self
 
-	def __copy__(self)->Float4096:
+	def __copy__(self)->Float8192:
 		return self
 
 	def __sizeof__(self)->int:
@@ -441,24 +441,87 @@ class Float4096:
 
 
 class MathF:
+	"""Functions and supporting variables, such as type unions/tuples"""
+
+	#? Unions for type hinting
+	#? Only indicate comptibility, thus all lower bit values are included too.
+	#? Just the larger values are excludes, like np.int_, which can be either 32 or 64 bit, and therefore is excluded from intsUnion32
+
+	#? Custom types
+	bigUIntsUnion64 = Union[UInt8192, UInt4096, UInt2048, UInt1024, UInt512, UInt256, UInt128]
+
+	bigIntsUnion64 = Union[Int8192, Int4096, Int2048, Int1024, Int512, Int256, Int128]
+
+	bigFloatsUnion64 = Union[Float8192, Float4096, Float2048, Float1024, Float512, Float256, Float128]
+
+	bigUIntsUnion32 = Union[UInt8192H, UInt4096H, UInt2048H, UInt1024H, UInt512H, UInt256H, UInt128H]
+
+	bigIntsUnion32 = Union[Int8192H, Int4096H, Int2048H, Int1024H, Int512H, Int256H, Int128H]
+
+	bigFloatsUnion32 = Union[Float8192H, Float4096H, Float2048H, Float1024H, Float512H, Float256H, Float128H]
+
+	#? Native and numpy types
+	intsUnion64 = Union[int, np.int_, np.int8, np.int16, np.int32, np.int64, np.intc]
+
+	uintsUnion64 = Union[np.uint, np.uint8, np.uint16, np.uint32, np.uint64, np.uintc]
+
+	floatsUnion64 = Union[float, np.float16, np.float32, np.float64, np.float96, np.float128]
+
+	intsUnion32 = Union[np.int8, np.int16, np.int32, np.intc]
+
+	uintsUnion32 = Union[np.uint8, np.uint16, np.uint32, np.uintc]
+
+	floatsUnion32 = Union[np.float16, np.float32]
+
+	#! Unionized unions get flattened, so this does actually work.
+	allIntsUnion32 = Union[bigIntsUnion32, intsUnion32]
+
+	allIntsUnion64 = Union[bigIntsUnion64, intsUnion64]
+
+	allUIntsUnion32 = Union[bigUIntsUnion32, uintsUnion32]
+
+	allUIntsUnion64 = Union[bigUIntsUnion64, uintsUnion64]
+
+	allFloatsUnion32 = Union[bigFloatsUnion32, floatsUnion32]
+
+	allFloatsUnion64 = Union[bigFloatsUnion64, floatsUnion64]
+
+	bit32Union = Union[bigIntsUnion32, bigUIntsUnion32, bigFloatsUnion32, intsUnion32, uintsUnion32, floatsUnion32]
+
+	bit32Union = Union[bigIntsUnion64, bigUIntsUnion64, bigFloatsUnion64, intsUnion64, uintsUnion64, floatsUnion64]
 
 
-	bit64types = (UInt4096, UInt2048, UInt1024, UInt512, UInt256, UInt128, Int4096, Int2048, Int1024, Int512, Int256, Int128,
-	Float4096, Float2048, Float1024, Float512, Float256, Float128)
+	#? Tuples for type checking
 
-	bit32types = (UInt4096H, UInt2048H, UInt1024H, UInt512H, UInt256H, UInt128H, Int4096H, Int2048H, Int1024H, Int512H, Int256H, Int128H,
-	Float4096H, Float2048H, Float1024H, Float512H, Float256H, Float128H)
+	#? 64 Bit
+	bigUInttypes64 = (UInt8192, UInt4096, UInt2048, UInt1024, UInt512, UInt256, UInt128)
 
-	bigIntsUnion64 = Union[UInt4096, UInt2048, UInt1024, UInt512, UInt256, UInt128, Int4096, Int2048, Int1024, Int512, Int256, Int128]
+	uinttypes64 = (np.uint, np.uint16, np.uint32, np.uint64)
 
-	bigFloatsUnion64 = Union[Float4096, Float2048, Float1024, Float512, Float256, Float128]
+	bigInttypes64 = (Int8192, Int4096, Int2048, Int1024, Int512, Int256, Int128)
 
-	bigIntsUnion32 = Union[UInt4096H, UInt2048H, UInt1024H, UInt512H, UInt256H, UInt128H, Int4096H, Int2048H, Int1024H, Int512H, Int256H, Int128H]
+	inttypes64 = (np.int_, np.int8, np.int16, np.int32, np.int64, int)
 
-	bigFloatsUnion32 = Union[Float4096H, Float2048H, Float1024H, Float512H, Float256H, Float128H]
+	bigFloattypes64 = (Float8192, Float4096, Float2048, Float1024, Float512, Float256, Float128)
 
-	def frexp(bigint: MathF.bigIntsUnion64|MathF.bigIntsUnion32):
-		"""Convert a bigint type to a floating point type. Returns the mantissa and exponent"""
+	floattypes64 = (np.float16, np.float32, np.float64)
+
+	#? 32 Bit
+	bigUInttypes32 = (UInt8192, UInt4096, UInt2048, UInt1024, UInt512, UInt256, UInt128)
+
+	uinttypes32 = (np.uint8, np.uint16, np.uint32, np.uintc)
+
+	bigInttypes32 = (Int8192, Int4096, Int2048, Int1024, Int512, Int256, Int128)
+
+	inttypes32 = (np.int8, np.int16, np.int32, np.intc)
+
+	bigFloattypes32 = (Float8192, Float4096, Float2048, Float1024, Float512, Float256, Float128)
+
+	floattypes32 = (np.float16, np.float32, np.float64)
+
+
+	def frexp(bigint: MathF.bigIntsUnion64|MathF.bigIntsUnion32)->tuple[np.ndarray[int, np.uint64|np.uint32], int]:
+		"""Convert a bigint type (this library's int and uint types) to a floating point type. Returns the mantissa and exponent, not an object."""
 		bitcount = len(bigint)
 		if bitcount == 0:
 			return bigint, 0
@@ -469,9 +532,3 @@ class MathF:
 		exponent = bitcount
 		return normalized, exponent
 
-
-		if isinstance(bigint, MathF.bit64types):
-			return len(bigint)*64
-		elif isinstance(bigint, MathF.bit32types):
-			return len(bigint)*32
-		else: raise TypeError(f"Unsuported type: {type(bigint)}")
