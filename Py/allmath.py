@@ -518,14 +518,12 @@ class MathF:
 		#! and more is coming in later versions
 	}
 
-	def indexgen(mode: MathF.allUIntsUnion|int = 2, indexvalue: MathF.allIntUIntsUnion = 0, *, 
+	def indexgen(mode: MathF.allUIntsUnion = 2, indexvalue: MathF.allUIntsUnion = 0, *, 
 			#! btw best for memory reasons to use the smalles uints you can, so here i'd pass np.uint8 for mode
 			signed: bool = False, 
 			littleEndian: bool = True,
 			chunkselect: bool|None = None, 
 			version2: bool = False) -> np.uint32:
-		if isinstance(mode, int):
-			mode = abs(mode) # we only use positive values for mode :3
 		index = 0
 		index |= ((mode & 0xF) << 27) # bit magic sets bits 30-27 to mode constrained to a value of 0...15
 		#? This is an in-place bitwise or, a bitwise and, and a bitwise leftshift
