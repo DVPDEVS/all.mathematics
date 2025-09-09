@@ -518,23 +518,29 @@ class MathF:
 		#! and more is coming in later versions
 	}
 
-	def indexgen(mode: MathF.allUIntsUnion = 2, indexvalue: MathF.allUIntsUnion = 0, *, 
+	def indexgen(mode: MathF.uintsUnion32 = 2, indexvalue: MathF.uintsUnion32 = 0, *, 
 			#! btw best for memory reasons to use the smalles uints you can, so here i'd pass np.uint8 for mode
-			signed: bool = False, 
-			littleEndian: bool = True,
-			chunkselect: bool|None = None, 
-			version2: bool = False) -> np.uint32:
+			signed: bool|np.uint8 = 0, 
+			littleEndian: bool|np.uint8 = 1,
+			chunkselect: bool|np.uint8|None = None, 
+			version2: bool|np.uint8 = 0) -> np.uint32:
 		"""Generates an index value `np.uint32` for indexing bigint/biguint types"""
-		index = 0
-		index |= ((mode & 0xF) << 27) # bit magic sets bits 30-27 to mode constrained to a value of 0...15
-		#? This is an in-place bitwise or, a bitwise and, and a bitwise leftshift
-		index |= ((signed & 0b1) << 18)
+		index = np.uint32(0)
+		#? clamp mode to lower 4 bits with an and operation
+		mode = np.uint32 (mode & 0xF)
+		signed = np.uint32(signed & 0b1)
+		littleEndian = np.uint32(littleEndian & 0b1)
+		chunkselect = np.uint32(chunkselect & 0b1) if chunkselect is not None else None
+		indexvalue = np.uint32(indexvalue & 0xFF)
+		index |= (mode << 27) # bit magic sets bits 30-27 to mode
+		#? This is an in-place bitwise or and a bitwise leftshift
+		index |= ((signed) << 18)
 		if chunkselect != None:
 			index |= ((chunkselect & 0b1) << 17)
 		index |= ((littleEndian & 0b1) << 16)
 		mask = 0 # build a mask for reserving bits in index value area/mask out indexvalue bits
 		for _ in range(mode):
-			mask >>= 1 # leftshift once
+			mask >>= 1 # right shift once
 			mask |= 0x8000 # this ors in one high bit (0b1000...)
 		index |= (indexvalue & ~mask) # mask out ignored bits, just in case
 		""" 
