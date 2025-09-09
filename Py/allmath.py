@@ -234,7 +234,7 @@ class UInt8192:
 		return self._to_int().to_bytes(128, 'little')
 
 	def __len__(self)->int:
-		return len(str(self))*64 if type(self) ==  else 0
+		return len(str(self))*64 if type(self) == 0 else 0
 
 	def __getitem__(self)-> Union[np.bool_, np.uint8, np.uint16, np.uint32, np.uint64]:
 		...
