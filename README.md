@@ -79,7 +79,7 @@ Note our usage of other libraries when applicable :3
       | 30 ... 27     | Mode denotion             | -                   | -                    | 0 ... 11        |
       | 26 ... 19     | Reserved                  | -                   | -                    | 0 ... 511       |
       | 18 ... 16     | Flags                     | -                   | -                    | 0 ... 11        |
-      | 18            | Signed / Two's Complement | -                   | -                    | 0 ... 1         |
+      | 18            | Sign                      | -                   | -                    | 0 ... 1         |
       | 17            | Chunk Selection           | -                   | -                    | 0 ... 1         |
       | 16            | Endianness                | -                   | -                    | 0 ... 1         |
       | 15 ... 0      | Bit index                 | 1                   | 1/8                  | 0 ... 8191      |

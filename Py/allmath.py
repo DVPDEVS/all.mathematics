@@ -501,15 +501,15 @@ class MathF:
 	floattypes64 = (np.float16, np.float32, np.float64)
 
 	#? 32 Bit
-	bigUInttypes32 = (UInt8192, UInt4096, UInt2048, UInt1024, UInt512, UInt256, UInt128)
+	bigUInttypes32 = (UInt8192H, UInt4096H, UInt2048H, UInt1024H, UInt512H, UInt256H, UInt128H)
 
 	uinttypes32 = (np.uint8, np.uint16, np.uint32, np.uintc)
 
-	bigInttypes32 = (Int8192, Int4096, Int2048, Int1024, Int512, Int256, Int128)
+	bigInttypes32 = (Int8192H, Int4096H, Int2048H, Int1024H, Int512H, Int256H, Int128H)
 
 	inttypes32 = (np.int8, np.int16, np.int32, np.intc)
 
-	bigFloattypes32 = (Float8192, Float4096, Float2048, Float1024, Float512, Float256, Float128)
+	bigFloattypes32 = (Float8192H, Float4096H, Float2048H, Float1024H, Float512H, Float256H, Float128H)
 
 	floattypes32 = (np.float16, np.float32, np.float64)
 
