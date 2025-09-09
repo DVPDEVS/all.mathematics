@@ -275,19 +275,19 @@ class Float8192:
 		return f"Float8192({''})"
 
 	def __add__(self, other: Float8192)->Float8192:
-		return res
+		return self
 
 	def __iadd__(self, other: Float8192)->Float8192:
 		return self
 
 	def __mul__(self, other: Float8192)->Float8192:
-		return res
+		return self
 
 	def __imul__(self, other: Float8192)->Float8192:
 		return self
 
 	def __sub__(self, other: Float8192)->Float8192:
-		return res
+		return self
 
 	def __isub__(self, other: Float8192)->Float8192:
 		return self
@@ -431,6 +431,54 @@ class Float8192:
 		return self
 
 
+class Types:
+	"""Simpler way to import and refer to types"""
+	#? 64 bit
+	UInt8192 = UInt8192
+	UInt4096 = UInt4096
+	UInt2048 = UInt2048
+	UInt1024 = UInt1024
+	UInt512 = UInt512
+	UInt256 = UInt256
+	UInt128 = UInt128
+	Int8192 = Int8192
+	Int4096 = Int4096
+	Int2048 = Int2048
+	Int1024 = Int1024
+	Int512 = Int512
+	Int256 = Int256
+	Int128 = Int128
+	Float8192 = Float8192
+	Float4096 = Float4096
+	Float2048 = Float2048
+	Float1024 = Float1024
+	Float512 = Float512
+	Float256 = Float256
+	Float128 = Float128
+	#? 32 bit
+	UInt8192H = UInt8192H
+	UInt4096H = UInt4096H
+	UInt2048H = UInt2048H
+	UInt1024H = UInt1024H
+	UInt512H = UInt512H
+	UInt256H = UInt256H
+	UInt128H = UInt128H
+	Int8192H = Int8192H
+	Int4096H = Int4096H
+	Int2048H = Int2048H
+	Int1024H = Int1024H
+	Int512H = Int512H
+	Int256H = Int256H
+	Int128H = Int128H
+	Float8192H = Float8192H
+	Float4096H = Float4096H
+	Float2048H = Float2048H
+	Float1024H = Float1024H
+	Float512H = Float512H
+	Float256H = Float256H
+	Float128H = Float128H
+
+
 
 class MathF:
 	"""Functions and supporting variables, such as type unions/tuples"""
@@ -440,12 +488,12 @@ class MathF:
 	#? Just the larger values are excludes, like np.int_, which can be either 32 or 64 bit, and therefore is excluded from intsUnion32
 
 	#? Custom types
-	bigUIntsUnion64 = Union[UInt8192, UInt4096, UInt2048, UInt1024, UInt512, UInt256, UInt128]
-	bigIntsUnion64 = Union[Int8192, Int4096, Int2048, Int1024, Int512, Int256, Int128]
-	bigFloatsUnion64 = Union[Float8192, Float4096, Float2048, Float1024, Float512, Float256, Float128]
-	bigUIntsUnion32 = Union[UInt8192H, UInt4096H, UInt2048H, UInt1024H, UInt512H, UInt256H, UInt128H]
-	bigIntsUnion32 = Union[Int8192H, Int4096H, Int2048H, Int1024H, Int512H, Int256H, Int128H]
-	bigFloatsUnion32 = Union[Float8192H, Float4096H, Float2048H, Float1024H, Float512H, Float256H, Float128H]
+	bigUIntsUnion64 = Union[Types.UInt8192, Types.UInt4096, Types.UInt2048, Types.UInt1024, Types.UInt512, Types.UInt256, Types.UInt128]
+	bigIntsUnion64 = Union[Types.Int8192, Types.Int4096, Types.Int2048, Types.Int1024, Types.Int512, Types.Int256, Types.Int128]
+	bigFloatsUnion64 = Union[Types.Float8192, Types.Float4096, Types.Float2048, Types.Float1024, Types.Float512, Types.Float256, Types.Float128]
+	bigUIntsUnion32 = Union[Types.UInt8192H, Types.UInt4096H, Types.UInt2048H, Types.UInt1024H, Types.UInt512H, Types.UInt256H, Types.UInt128H]
+	bigIntsUnion32 = Union[Types.Int8192H, Types.Int4096H, Types.Int2048H, Types.Int1024H, Types.Int512H, Types.Int256H, Types.Int128H]
+	bigFloatsUnion32 = Union[Types.Float8192H, Types.Float4096H, Types.Float2048H, Types.Float1024H, Types.Float512H, Types.Float256H, Types.Float128H]
 
 	#? Native and numpy types
 	intsUnion64 = Union[int, np.int_, np.int8, np.int16, np.int32, np.int64, np.intc]
@@ -472,19 +520,19 @@ class MathF:
 	#? Tuples for type checking
 
 	#? 64 Bit
-	bigUInttypes64 = (UInt8192, UInt4096, UInt2048, UInt1024, UInt512, UInt256, UInt128)
+	bigUInttypes64 = (Types.UInt8192, Types.UInt4096, Types.UInt2048, Types.UInt1024, Types.UInt512, Types.UInt256, Types.UInt128)
 	uinttypes64 = (np.uint, np.uint16, np.uint32, np.uint64)
-	bigInttypes64 = (Int8192, Int4096, Int2048, Int1024, Int512, Int256, Int128)
+	bigInttypes64 = (Types.Int8192, Types.Int4096, Types.Int2048, Types.Int1024, Types.Int512, Types.Int256, Types.Int128)
 	inttypes64 = (np.int_, np.int8, np.int16, np.int32, np.int64, int)
-	bigFloattypes64 = (Float8192, Float4096, Float2048, Float1024, Float512, Float256, Float128)
+	bigFloattypes64 = (Types.Float8192, Types.Float4096, Types.Float2048, Types.Float1024, Types.Float512, Types.Float256, Types.Float128)
 	floattypes64 = (np.float16, np.float32, np.float64)
 
 	#? 32 Bit
-	bigUInttypes32 = (UInt8192H, UInt4096H, UInt2048H, UInt1024H, UInt512H, UInt256H, UInt128H)
+	bigUInttypes32 = (Types.UInt8192H, Types.UInt4096H, Types.UInt2048H, Types.UInt1024H, Types.UInt512H, Types.UInt256H, Types.UInt128H)
 	uinttypes32 = (np.uint8, np.uint16, np.uint32, np.uintc)
-	bigInttypes32 = (Int8192H, Int4096H, Int2048H, Int1024H, Int512H, Int256H, Int128H)
+	bigInttypes32 = (Types.Int8192H, Types.Int4096H, Types.Int2048H, Types.Int1024H, Types.Int512H, Types.Int256H, Types.Int128H)
 	inttypes32 = (np.int8, np.int16, np.int32, np.intc)
-	bigFloattypes32 = (Float8192H, Float4096H, Float2048H, Float1024H, Float512H, Float256H, Float128H)
+	bigFloattypes32 = (Types.Float8192H, Types.Float4096H, Types.Float2048H, Types.Float1024H, Types.Float512H, Types.Float256H, Types.Float128H)
 	floattypes32 = (np.float16, np.float32, np.float64)
 
 
