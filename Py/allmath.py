@@ -2,8 +2,6 @@ from __future__ import annotations # Treat type hints as strings/future types. t
 import numpy as np
 from typing import Union
 
-from fontTools.ttLib.tables.otConverters import UInt8
-
 # Custom type for storing 1024 byte unsigned integers
 class UInt8192:
 	"""This is a fixed-size unsigned 8192-bit integer type. It IMMEDIATELY takes 1KB of ram."""
