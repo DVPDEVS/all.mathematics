@@ -524,6 +524,7 @@ class MathF:
 			littleEndian: bool = True,
 			chunkselect: bool|None = None, 
 			version2: bool = False) -> np.uint32:
+		"""Generates an index value `np.uint32` for indexing bigint/biguint types"""
 		index = 0
 		index |= ((mode & 0xF) << 27) # bit magic sets bits 30-27 to mode constrained to a value of 0...15
 		#? This is an in-place bitwise or, a bitwise and, and a bitwise leftshift
