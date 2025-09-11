@@ -137,7 +137,7 @@ Note our usage of other libraries when applicable :3
   - Ellipses  
   - Helper function  
 
-    Theres a helper function, `MathF.indexgen()` which i heavily suggest using.  
+    Theres a helper function, `Types.index_encode()` which i heavily suggest using.  
     It mainly takes two arguments, w/o keywords, `mode` and `indexvalue`.  
     From this a `np.uint32` is dynamically created and returned.  
     Contained are the default settings (keyword arguments):  

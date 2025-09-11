@@ -235,7 +235,7 @@ class UInt8192:
 		return np.uint8(1024)
 
 	def __getitem__(self, index = np.uint32)-> MathF.allUIntsUnion:
-		version, modeval, sign, chunkselect, endianness, indexvalue = Types.decode_index(index)
+		version, modeval, sign, chunkselect, endianness, indexvalue = Types.index_decode(index)
 		version		 = np.uint8(version)
 		modeval		 = np.uint8(modeval)
 		sign		 = np.uint8(sign)
@@ -533,7 +533,7 @@ class Float8192:
 
 
 class Types:
-	"""Simpler way to import and refer to types"""
+	"""Simpler way to import, refer, check and hint to types"""
 	#? 64 bit
 	UInt8192 = UInt8192
 	UInt4096 = UInt4096
@@ -579,8 +579,7 @@ class Types:
 	Float256H = Float256H
 	Float128H = Float128H
 
-
-	def decode_index(index: np.uint32)->tuple[np.uint32,]:
+	def index_decode(index: np.uint32)->tuple[np.uint32,]:
 		modeval: np.uint32 = index & 0x78000000 # 0b01111000000000000000000000000000
 		version: np.uint32 = index & 0x80000000 # 0b1000...
 		sign: np.uint32 = index & 0x40000
@@ -589,92 +588,7 @@ class Types:
 		indexvalue: np.uint32 = index & 0xFFFF
 		return (version, modeval, sign, chunkselect, endianness, indexvalue)
 
-
-class MathF:
-	"""Functions and supporting variables, such as type unions/tuples"""
-
-	#? Unions for type hinting
-	#? Only indicate comptibility, thus all lower bit values are included too.
-	#? Just the larger values are excludes, like np.int_, which can be either 32 or 64 bit, and therefore is excluded from intsUnion32
-
-	#? Custom types
-	bigUIntsUnion64 = Union[Types.UInt8192, Types.UInt4096, Types.UInt2048, Types.UInt1024, Types.UInt512, Types.UInt256, Types.UInt128]
-	bigIntsUnion64 = Union[Types.Int8192, Types.Int4096, Types.Int2048, Types.Int1024, Types.Int512, Types.Int256, Types.Int128]
-	bigFloatsUnion64 = Union[Types.Float8192, Types.Float4096, Types.Float2048, Types.Float1024, Types.Float512, Types.Float256, Types.Float128]
-	bigUIntsUnion32 = Union[Types.UInt8192H, Types.UInt4096H, Types.UInt2048H, Types.UInt1024H, Types.UInt512H, Types.UInt256H, Types.UInt128H]
-	bigIntsUnion32 = Union[Types.Int8192H, Types.Int4096H, Types.Int2048H, Types.Int1024H, Types.Int512H, Types.Int256H, Types.Int128H]
-	bigFloatsUnion32 = Union[Types.Float8192H, Types.Float4096H, Types.Float2048H, Types.Float1024H, Types.Float512H, Types.Float256H, Types.Float128H]
-
-	#? Native and numpy types
-	intsUnion64 = Union[int, np.int_, np.int8, np.int16, np.int32, np.int64, np.intc]
-	uintsUnion64 = Union[np.uint, np.uint8, np.uint16, np.uint32, np.uint64, np.uintc]
-	floatsUnion64 = Union[float, np.float16, np.float32, np.float64, np.float96, np.float128]
-	intsUnion32 = Union[np.int8, np.int16, np.int32, np.intc]
-	uintsUnion32 = Union[np.uint8, np.uint16, np.uint32, np.uintc]
-	floatsUnion32 = Union[np.float16, np.float32]
-
-	#! Unionized unions get flattened, so this does actually work.
-	allIntsUnion32 = Union[bigIntsUnion32, intsUnion32]
-	allIntsUnion64 = Union[bigIntsUnion64, intsUnion64]
-	allUIntsUnion32 = Union[bigUIntsUnion32, uintsUnion32]
-	allUIntsUnion64 = Union[bigUIntsUnion64, uintsUnion64]
-	allUIntsUnion = Union[allUIntsUnion32, allUIntsUnion64]
-	allIntsUnion = Union[allIntsUnion32, allIntsUnion64]
-	allIntUIntsUnion = Union[allIntsUnion, allUIntsUnion]
-	allFloatsUnion32 = Union[bigFloatsUnion32, floatsUnion32]
-	allFloatsUnion64 = Union[bigFloatsUnion64, floatsUnion64]
-	bit32Union = Union[bigIntsUnion32, bigUIntsUnion32, bigFloatsUnion32, intsUnion32, uintsUnion32, floatsUnion32]
-	bit32Union = Union[bigIntsUnion64, bigUIntsUnion64, bigFloatsUnion64, intsUnion64, uintsUnion64, floatsUnion64]
-
-
-	#? Tuples for type checking
-
-	#? 64 Bit
-	bigUInttypes64 = (Types.UInt8192, Types.UInt4096, Types.UInt2048, Types.UInt1024, Types.UInt512, Types.UInt256, Types.UInt128)
-	uinttypes64 = (np.uint, np.uint16, np.uint32, np.uint64)
-	bigInttypes64 = (Types.Int8192, Types.Int4096, Types.Int2048, Types.Int1024, Types.Int512, Types.Int256, Types.Int128)
-	inttypes64 = (np.int_, np.int8, np.int16, np.int32, np.int64, int)
-	bigFloattypes64 = (Types.Float8192, Types.Float4096, Types.Float2048, Types.Float1024, Types.Float512, Types.Float256, Types.Float128)
-	floattypes64 = (np.float16, np.float32, np.float64)
-
-	#? 32 Bit
-	bigUInttypes32 = (Types.UInt8192H, Types.UInt4096H, Types.UInt2048H, Types.UInt1024H, Types.UInt512H, Types.UInt256H, Types.UInt128H)
-	uinttypes32 = (np.uint8, np.uint16, np.uint32, np.uintc)
-	bigInttypes32 = (Types.Int8192H, Types.Int4096H, Types.Int2048H, Types.Int1024H, Types.Int512H, Types.Int256H, Types.Int128H)
-	inttypes32 = (np.int8, np.int16, np.int32, np.intc)
-	bigFloattypes32 = (Types.Float8192H, Types.Float4096H, Types.Float2048H, Types.Float1024H, Types.Float512H, Types.Float256H, Types.Float128H)
-	floattypes32 = (np.float16, np.float32, np.float64)
-
-
-	def frexp(bigint: MathF.bigIntsUnion64|MathF.bigIntsUnion32)->tuple[np.ndarray[int, np.uint64|np.uint32], int]:
-		"""Convert a bigint type (this library's int and uint types) to a floating point type. Returns the mantissa and exponent, not an object."""
-		bitcount = len(bigint) #? ngl i barely know what this does
-		if bitcount == 0:
-			return bigint, 0
-		chunk_size = bigint.chunks.itemsize * 8
-		max_bits = len(bigint.chunks) * chunk_size
-		shift = max_bits - bitcount
-		normalized = bigint << shift
-		exponent = bitcount
-		return normalized, exponent
-
-	indexmodes = {
-		'bit'		:0b00000,
-		'nybble'	:0b00001,
-		'byte'		:0b00010,
-		'word'		:0b00011,
-		'dword'		:0b00100,
-		'qword'		:0b00101,
-		'uint128'	:0b00110,
-		'uint256'	:0b00111,
-		'uint512'	:0b01000,
-		'uint1024'	:0b01001,
-		'uint2048'	:0b01010,
-		'uint4096'	:0b01011,
-		#! and more is coming in later versions
-	}
-
-	def indexgen(mode: MathF.uintsUnion32 = 2, indexvalue: MathF.uintsUnion32 = 0, *, 
+	def index_encode(mode: MathF.uintsUnion32 = 2, indexvalue: MathF.uintsUnion32 = 0, *, 
 			#! btw best for memory reasons to use the smalles uints you can, so here i'd pass np.uint8 for mode
 			signed: bool|np.uint8 = 0, 
 			littleEndian: bool|np.uint8 = 1,
@@ -726,5 +640,86 @@ class MathF:
 		supply 65535, and 13 bits = 0x1fff = 0b 0001 1111 1111 1111 = 8191
 		"""
 		return np.uint32(index)
+
+	#? Unions for type hinting
+	#? Only indicate comptibility, thus all lower bit values are included too.
+	#? Just the larger values are excludes, like np.int_, which can be either 32 or 64 bit, and therefore is excluded from intsUnion32
+
+	#? Custom types
+	bigUIntsUnion64 = Union[UInt8192, UInt4096, UInt2048, UInt1024, UInt512, UInt256, UInt128]
+	bigIntsUnion64 = Union[Int8192, Int4096, Int2048, Int1024, Int512, Int256, Int128]
+	bigFloatsUnion64 = Union[Float8192, Float4096, Float2048, Float1024, Float512, Float256, Float128]
+	bigUIntsUnion32 = Union[UInt8192H, UInt4096H, UInt2048H, UInt1024H, UInt512H, UInt256H, UInt128H]
+	bigIntsUnion32 = Union[Int8192H, Int4096H, Int2048H, Int1024H, Int512H, Int256H, Int128H]
+	bigFloatsUnion32 = Union[Float8192H, Float4096H, Float2048H, Float1024H, Float512H, Float256H, Float128H]
+	#? Native and numpy types
+	intsUnion64 = Union[int, np.int_, np.int8, np.int16, np.int32, np.int64, np.intc]
+	uintsUnion64 = Union[np.uint, np.uint8, np.uint16, np.uint32, np.uint64, np.uintc]
+	floatsUnion64 = Union[float, np.float16, np.float32, np.float64, np.float96, np.float128]
+	intsUnion32 = Union[np.int8, np.int16, np.int32, np.intc]
+	uintsUnion32 = Union[np.uint8, np.uint16, np.uint32, np.uintc]
+	floatsUnion32 = Union[np.float16, np.float32]
+	#! Unionized unions get flattened, so this does actually work.
+	allIntsUnion32 = Union[bigIntsUnion32, intsUnion32]
+	allIntsUnion64 = Union[bigIntsUnion64, intsUnion64]
+	allUIntsUnion32 = Union[bigUIntsUnion32, uintsUnion32]
+	allUIntsUnion64 = Union[bigUIntsUnion64, uintsUnion64]
+	allUIntsUnion = Union[allUIntsUnion32, allUIntsUnion64]
+	allIntsUnion = Union[allIntsUnion32, allIntsUnion64]
+	allIntUIntsUnion = Union[allIntsUnion, allUIntsUnion]
+	allFloatsUnion32 = Union[bigFloatsUnion32, floatsUnion32]
+	allFloatsUnion64 = Union[bigFloatsUnion64, floatsUnion64]
+	bit32Union = Union[bigIntsUnion32, bigUIntsUnion32, bigFloatsUnion32, intsUnion32, uintsUnion32, floatsUnion32]
+	bit32Union = Union[bigIntsUnion64, bigUIntsUnion64, bigFloatsUnion64, intsUnion64, uintsUnion64, floatsUnion64]
+
+	#? Tuples for type checking
+	#? 64 Bit
+	bigUInttypes64 = (UInt8192, UInt4096, UInt2048, UInt1024, UInt512, UInt256, UInt128)
+	uinttypes64 = (np.uint, np.uint16, np.uint32, np.uint64)
+	bigInttypes64 = (Int8192, Int4096, Int2048, Int1024, Int512, Int256, Int128)
+	inttypes64 = (np.int_, np.int8, np.int16, np.int32, np.int64, int)
+	bigFloattypes64 = (Float8192, Float4096, Float2048, Float1024, Float512, Float256, Float128)
+	floattypes64 = (np.float16, np.float32, np.float64)
+	#? 32 Bit
+	bigUInttypes32 = (UInt8192H, UInt4096H, UInt2048H, UInt1024H, UInt512H, UInt256H, UInt128H)
+	uinttypes32 = (np.uint8, np.uint16, np.uint32, np.uintc)
+	bigInttypes32 = (Int8192H, Int4096H, Int2048H, Int1024H, Int512H, Int256H, Int128H)
+	inttypes32 = (np.int8, np.int16, np.int32, np.intc)
+	bigFloattypes32 = (Float8192H, Float4096H, Float2048H, Float1024H, Float512H, Float256H, Float128H)
+	floattypes32 = (np.float16, np.float32, np.float64)
+
+
+class MathF:
+	"""Functions and supporting variables, such as type unions/tuples"""
+
+
+	def frexp(bigint: MathF.bigIntsUnion64|MathF.bigIntsUnion32)->tuple[np.ndarray[int, np.uint64|np.uint32], int]:
+		"""Convert a bigint type (this library's int and uint types) to a floating point type. Returns the mantissa and exponent, not an object."""
+		bitcount = len(bigint) #? ngl i barely know what this does
+		if bitcount == 0:
+			return bigint, 0
+		chunk_size = bigint.chunks.itemsize * 8
+		max_bits = len(bigint.chunks) * chunk_size
+		shift = max_bits - bitcount
+		normalized = bigint << shift
+		exponent = bitcount
+		return normalized, exponent
+
+	indexmodes = {
+		'bit'		:0b00000,
+		'nybble'	:0b00001,
+		'byte'		:0b00010,
+		'word'		:0b00011,
+		'dword'		:0b00100,
+		'qword'		:0b00101,
+		'uint128'	:0b00110,
+		'uint256'	:0b00111,
+		'uint512'	:0b01000,
+		'uint1024'	:0b01001,
+		'uint2048'	:0b01010,
+		'uint4096'	:0b01011,
+		#! and more is coming in later versions
+	}
+
 
 
