@@ -642,9 +642,8 @@ class Types:
 		return np.uint32(index)
 
 	#? Unions for type hinting
-	#? Only indicate comptibility, thus all lower bit values are included too.
-	#? Just the larger values are excludes, like np.int_, which can be either 32 or 64 bit, and therefore is excluded from intsUnion32
-
+	#? Only indicate compatibility, thus all lower bit values are included too.
+	#? Just the larger values are excluded, like np.int_, which can be either 32 or 64 bit, and therefore is excluded from intsUnion32
 	#? Custom types
 	bigUIntsUnion64	 = Union[UInt8192,   UInt4096,   UInt2048,   UInt1024,   UInt512,   UInt256,   UInt128							]
 	bigIntsUnion64	 = Union[Int8192,    Int4096,    Int2048,    Int1024,    Int512,    Int256,    Int128							]
@@ -659,7 +658,6 @@ class Types:
 	intsUnion32		 = Union[np.int8,    np.int16,   np.int32,   np.intc															]
 	uintsUnion32	 = Union[np.uint8,   np.uint16,  np.uint32,  np.uintc															]
 	floatsUnion32	 = Union[np.float16, np.float32																					]
-	#! Unionized unions get flattened, so this does actually work.
 	allIntsUnion32	 = Union[bigIntsUnion32,   intsUnion32																			]
 	allIntsUnion64	 = Union[bigIntsUnion64,   intsUnion64																			]
 	allUIntsUnion32	 = Union[bigUIntsUnion32,  uintsUnion32																			]
