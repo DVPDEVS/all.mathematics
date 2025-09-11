@@ -309,31 +309,32 @@ class UInt8192:
 						for i in range(2): #! also i cant explain this for some reason but like ik this is a hard requirement. trust me bro
 							value[i] = self.chunks[(indexvalue * 2) + i]
 						return value
-					case np.uint8(6): # UInt256 indexing
+					case np.uint8(7): # UInt256 indexing
 						value = Types.UInt256(0)
 						for i in range(4):
 							value[i] = self.chunks[(indexvalue * 4) + i]
 						return value
-					case np.uint8(6): # UInt512 indexing
+					case np.uint8(8): # UInt512 indexing
 						value = Types.UInt512(0)
 						for i in range(8):
 							value[i] = self.chunks[(indexvalue * 8) + i]
 						return value
-					case np.uint8(6): # UInt1024 indexing
+					case np.uint8(9): # UInt1024 indexing
 						value = Types.UInt1024(0)
 						for i in range(16):
 							value[i] = self.chunks[(indexvalue * 16) + i]
 						return value
-					case np.uint8(6): # UInt2048 indexing
+					case np.uint8(10): # UInt2048 indexing
 						value = Types.UInt2048(0)
 						for i in range(32):
 							value[i] = self.chunks[(indexvalue * 32) + i]
 						return value
-					case np.uint8(6): # UInt4096 indexing
+					case np.uint8(11): # UInt4096 indexing
 						value = Types.UInt4096(0)
 						for i in range(64): #! I am actively convincing myself that this will actually work and i dont like it
 							value[i] = self.chunks[(indexvalue * 64) + i]
 						return value
+					case _: raise ValueError(f"Indexing type not supported by version 1 indexing of {type(self)}")
 			except IndexError: raise IndexError("Index value is out of bounds for index type")
 
 	def __setitem__(self)->UInt8192:
