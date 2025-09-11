@@ -336,6 +336,7 @@ class UInt8192:
 						return value
 					case _: raise ValueError(f"Indexing type not supported by version 1 indexing of {type(self)}")
 			except IndexError: raise IndexError("Index value is out of bounds for index type")
+		else: raise NotImplementedError("Version 2 has not been implemented for this version yet.")
 
 	def __setitem__(self)->UInt8192:
 		return self
