@@ -572,18 +572,18 @@ class MathF:
 			version2: bool|np.uint8 = 0) -> np.uint32:
 		"""Generates an index value `np.uint32` for indexing bigint/biguint types"""
 		index = np.uint32(0)
-		#? clamp mode to lower 4 bits with an and operation
-		mode = np.uint32 (mode & 0xF)
+		#? Casting to uint32s to avoid outbounding :3
+		mode = np.uint32 (mode & 0xF) #? clamp mode to lower 4 bits with an and operation
 		signed = np.uint32(signed & 0b1)
 		littleEndian = np.uint32(littleEndian & 0b1)
 		chunkselect = np.uint32(chunkselect & 0b1) if chunkselect is not None else None
 		indexvalue = np.uint32(indexvalue & 0xFF)
 		index |= (mode << 27) # bit magic sets bits 30-27 to mode
 		#? This is an in-place bitwise or and a bitwise leftshift
-		index |= ((signed) << 18)
+		index |= (signed << 18)
 		if chunkselect != None:
-			index |= ((chunkselect & 0b1) << 17)
-		index |= ((littleEndian & 0b1) << 16)
+			index |= (chunkselect << 17)
+		index |= (littleEndian << 16)
 		mask = 0 # build a mask for reserving bits in index value area/mask out indexvalue bits
 		for _ in range(mode):
 			mask >>= 1 # right shift once
