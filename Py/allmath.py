@@ -669,8 +669,9 @@ class Types:
 	allIntUIntsUnion = Union[allIntsUnion, allUIntsUnion]
 	allFloatsUnion32 = Union[bigFloatsUnion32, floatsUnion32]
 	allFloatsUnion64 = Union[bigFloatsUnion64, floatsUnion64]
-	bit32Union = Union[bigIntsUnion32, bigUIntsUnion32, bigFloatsUnion32, intsUnion32, uintsUnion32, floatsUnion32]
-	bit32Union = Union[bigIntsUnion64, bigUIntsUnion64, bigFloatsUnion64, intsUnion64, uintsUnion64, floatsUnion64]
+	bit32Union = Union[allIntsUnion32, allUIntsUnion32, allFloatsUnion32]
+	bit32Union = Union[allIntsUnion64, allUIntsUnion64, allFloatsUnion64]
+	allBigTypesUnion = Union[bigIntsUnion32, bigIntsUnion64, bigUIntsUnion32, bigUIntsUnion64, bigFloatsUnion32, bigFloatsUnion64]
 
 	#? Tuples for type checking
 	#? 64 Bit
