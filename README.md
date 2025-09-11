@@ -7,7 +7,7 @@ Note our usage of other libraries when applicable :3
 
 ---  
 
-### Types:  
+### Types  
 
 - 64 Bit
   - UInt
@@ -133,8 +133,21 @@ Note our usage of other libraries when applicable :3
     | np.uint   | 4-8 bytes (auto) |
     | np.uintc  | 4 bytes          |
 
-  - Slice
+  - Slice  
   - Ellipses  
+  - Helper function  
+
+    Theres a helper function, `MathF.indexgen()` which i heavily suggest using.  
+    It mainly takes two arguments, w/o keywords, `mode` and `indexvalue`.  
+    From this a `np.uint32` is dynamically created and returned.  
+    Contained are the default settings (keyword arguments):  
+
+    - `sign = False | 0`  
+    - `littleEndian = True | 1` (translates to endianness, which is little (1) by default)  
+    - `version2 = False | 0`  
+
+    and your input values, in the exact structure specified in documentation.  
+    `mode` defaults to 2, that is, byte indexing, and `indexvalue` to 0, thus the first byte/8 bits of the big type's value.  
 - Logic
-  - Per now uses other types' logic for most thing like len()
+  - Per now uses other types' logic for most things  
 - ...  
