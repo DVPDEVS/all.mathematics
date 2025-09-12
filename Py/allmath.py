@@ -242,11 +242,6 @@ class UInt8192:
 		chunkselect  = np.uint8(chunkselect)
 		endianness	 = np.uint8(endianness)
 		indexvalue	 = np.uint16(indexvalue)
-		# mask = np.uint32(0)
-		# for _ in range(modeval):
-		# 	mask >>= 1
-		# 	mask |= 0x8000
-		# indexvalue |= (indexvalue & ~mask)
 		if version == 1:
 			match indexvalue:
 				case _ if modeval == np.uint8(0)  and indexvalue >= np.uint16(8192): # just in case you dont rember the mode chart
@@ -580,28 +575,43 @@ class Types:
 	Float128H = Float128H
 
 	def index_decode(index: np.uint32)->tuple[np.uint32,]:
-		modeval: np.uint32 = index & 0x78000000 # 0b01111000000000000000000000000000
-		version: np.uint32 = index & 0x80000000 # 0b1000...
-		sign: np.uint32 = index & 0x40000
-		chunkselect: np.uint32 = index & 0x20000
-		endianness: np.uint32 = index & 0x10000
-		indexvalue: np.uint32 = index & 0xFFFF
+		modeval: np.uint32 = (index & np.uint32(0x78000000)) >> np.uint8(27) # mask = 0b01111000000000000000000000000000
+		version: np.uint32 = (index & np.uint32(0x80000000)) >> np.uint8(31) # mask = 0b1000...
+		sign: np.uint32 = (index & np.uint32(0x40000)) >> np.uint8(18)
+		chunkselect: np.uint32 = (index & np.uint32(0x20000)) >> np.uint8(17)
+		endianness: np.uint32 = (index & np.uint32(0x10000)) >> np.uint8(16)
+		indexvalue: np.uint32 = index & np.uint32(0xFFFF)
 		return (version, modeval, sign, chunkselect, endianness, indexvalue)
 
-	def index_encode(mode: MathF.uintsUnion32 = 2, indexvalue: MathF.uintsUnion32 = 0, *, 
+	def index_validate(index: np.uint32)->tuple[np.uint8, NotImplementedError|ValueError] | np.uint8:
+		#? avoid returning bools or ints for memory savings. see readme for more info
+		if index & 0x80000000 != np.uint32(0): #? check for version. current only applicable is 1, or 0b0...
+			return np.uint8(0), NotImplementedError("Version 2 has not been implemented")
+		mode = (index & 0x78000000) >> np.uint8(27)
+		mask = np.uint32(0)
+		for _ in range(mode+3): # v1 only uses 3 less bits for index values than reserved
+			mask >>= 1
+			mask |= 0x8000
+		indexvalue = index & 0xFFFF
+		indexvaluemasked |= (indexvalue & ~mask)
+		if indexvalue != indexvaluemasked:
+			return np.uint8(0), ValueError("Index is out of range for index type")
+		return np.uint8(1)
+
+	def index_encode(mode: MathF.uintsUnion32 = np.uint8(2), indexvalue: MathF.uintsUnion32 = np.uint32(0), *,
 			#! btw best for memory reasons to use the smalles uints you can, so here i'd pass np.uint8 for mode
-			signed: bool|np.uint8 = 0, 
-			littleEndian: bool|np.uint8 = 1,
-			chunkselect: bool|np.uint8|None = None, 
-			version2: bool|np.uint8 = 0) -> np.uint32:
+			signed: bool|np.uint8 = np.uint8(0),
+			littleEndian: bool|np.uint8 = np.uint8(1),
+			chunkselect: bool|np.uint8|None = None,
+			version2: bool|np.uint8 = np.uint8(0)) -> np.uint32:
 		"""Generates an index value `np.uint32` for indexing bigint/biguint types"""
 		index = np.uint32(0)
 		#? Casting to uint32s to avoid outbounding :3
-		mode = np.uint32 (mode & 0xF) #? clamp mode to lower 4 bits with an and operation
-		signed = np.uint32(signed & 0b1)
-		littleEndian = np.uint32(littleEndian & 0b1)
-		chunkselect = np.uint32(chunkselect & 0b1) if chunkselect is not None else None
-		indexvalue = np.uint32(indexvalue & 0xFF)
+		mode = np.uint32 (mode & 0xF) #? mask out mode to lower 4 bits with an and operation
+		signed = np.uint32(signed & 0b1) # bool value
+		littleEndian = np.uint32(littleEndian & 0b1) # bool value
+		chunkselect = np.uint32(chunkselect & 0b1) if chunkselect is not None else None # bool value uwu
+		indexvalue = np.uint32(indexvalue & 0xFF) # can be up to 16 bits
 		index |= (mode << 27) # bit magic sets bits 30-27 to mode
 		#? This is an in-place bitwise or and a bitwise leftshift
 		index |= (signed << 18)
@@ -609,11 +619,11 @@ class Types:
 			index |= (chunkselect << 17)
 		index |= (littleEndian << 16)
 		mask = np.uint32(0) # build a mask for reserving bits in index value area/mask out indexvalue bits
-		for _ in range(mode):
+		for _ in range(mode+3):
 			mask >>= 1 # right shift once
 			mask |= 0x8000 # this ors in one high bit (0b1000...)
 		index |= (indexvalue & ~mask) # mask out ignored bits, just in case
-		""" 
+		"""
 		An example of an index which may be constructed with this:
 		mode = 3 [word]
 		signed = True [Negative value]
@@ -658,6 +668,7 @@ class Types:
 	intsUnion32		 = Union[np.int8,          np.int16,   		np.int32,   	 np.intc														]
 	uintsUnion32	 = Union[np.uint8,         np.uint16,  		np.uint32,  	 np.uintc														]
 	floatsUnion32	 = Union[np.float16,       np.float32																						]
+	#? Combos
 	allIntsUnion32	 = Union[bigIntsUnion32,   intsUnion32																						]
 	allIntsUnion64	 = Union[bigIntsUnion64,   intsUnion64																						]
 	allUIntsUnion32	 = Union[bigUIntsUnion32,  uintsUnion32																						]
@@ -673,19 +684,19 @@ class Types:
 
 	#? Tuples for type checking
 	#? Custom types
-	bigInttypes64	 = (Int8192,    		   Int4096,    		Int2048,    	 Int1024,    	  Int512,    	  	Int256,    		  Int128	)
-	bigUInttypes64	 = (UInt8192,   		   UInt4096,   		UInt2048,   	 UInt1024,   	  UInt512,   	  	UInt256,   		  UInt128	)
-	bigFloattypes64	 = (Float8192,  		   Float4096,  		Float2048,  	 Float1024,  	  Float512,  	  	Float256,  		  Float128	)
-	bigInttypes32	 = (Int8192H,   		   Int4096H,   		Int2048H,   	 Int1024H,   	  Int512H,   	  	Int256H,   		  Int128H	)
-	bigUInttypes32	 = (UInt8192H,  		   UInt4096H,  		UInt2048H,  	 UInt1024H,  	  UInt512H,  	  	UInt256H,  		  UInt128H	)
-	bigFloattypes32	 = (Float8192H, 		   Float4096H, 		Float2048H, 	 Float1024H, 	  Float512H, 	  	Float256H, 		  Float128H	)
+	bigInttypes64	 = (	 Int8192,    	   Int4096,    		Int2048,    	 Int1024,    	  Int512,    	  	Int256,    		  Int128	)
+	bigUInttypes64	 = (	 UInt8192,   	   UInt4096,   		UInt2048,   	 UInt1024,   	  UInt512,   	  	UInt256,   		  UInt128	)
+	bigFloattypes64	 = (	 Float8192,  	   Float4096,  		Float2048,  	 Float1024,  	  Float512,  	  	Float256,  		  Float128	)
+	bigInttypes32	 = (	 Int8192H,   	   Int4096H,   		Int2048H,   	 Int1024H,   	  Int512H,   	  	Int256H,   		  Int128H	)
+	bigUInttypes32	 = (	 UInt8192H,  	   UInt4096H,  		UInt2048H,  	 UInt1024H,  	  UInt512H,  	  	UInt256H,  		  UInt128H	)
+	bigFloattypes32	 = (	 Float8192H, 	   Float4096H, 		Float2048H, 	 Float1024H, 	  Float512H, 	  	Float256H, 		  Float128H	)
 	#? Native/numpy types
-	inttypes64		 = (np.int_,    		   np.int8,    		np.int16,   	 np.int32,   	  np.int64,  	  	int							)
-	uinttypes64		 = (np.uint,    		   np.uint16,  		np.uint32,  	 np.uint64														)
-	floattypes64	 = (np.float16, 		   np.float32, 		np.float64		 																)
-	inttypes32		 = (np.int8,    		   np.int16,   		np.int32,   	 np.intc														)
-	uinttypes32		 = (np.uint8,   		   np.uint16,  		np.uint32,  	 np.uintc														)
-	floattypes32	 = (np.float16, 		   np.float32, 		np.float64																		)
+	inttypes64		 = (	 np.int_,    	   np.int8,    		np.int16,   	 np.int32,   	  np.int64,  	  	int							)
+	uinttypes64		 = (	 np.uint,    	   np.uint16,  		np.uint32,  	 np.uint64														)
+	floattypes64	 = (	 np.float16, 	   np.float32, 		np.float64		 																)
+	inttypes32		 = (	 np.int8,    	   np.int16,   		np.int32,   	 np.intc														)
+	uinttypes32		 = (	 np.uint8,   	   np.uint16,  		np.uint32,  	 np.uintc														)
+	floattypes32	 = (	 np.float16, 	   np.float32, 		np.float64																		)
 
 
 class MathF:
