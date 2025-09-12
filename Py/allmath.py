@@ -235,9 +235,10 @@ class UInt8192:
 		return np.uint8(1024)
 
 	def __getitem__(self, indexer = 
-			slice[np.uint32|None,np.uint32|None,np.uint32|None] | np.uint32 |
-			tuple[Ellipsis|None|np.uint32, Ellipsis|None|np.uint32, Ellipsis|None|np.uint32] |
-			tuple[Ellipsis|None|np.uint32, Ellipsis|None|np.uint32] | Ellipsis|None|np.uint32
+			slice[np.uint32|None,np.uint32|None,np.uint32|None] |
+			tuple[Ellipsis|np.uint32, Ellipsis|np.uint32, Ellipsis|np.uint32] |
+			tuple[Ellipsis|np.uint32, Ellipsis|np.uint32] | 
+			Ellipsis|np.uint32
 			)-> Types.allUIntsUnion:
 		if type(indexer) == np.uint32:
 			index = indexer

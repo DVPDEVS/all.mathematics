@@ -133,8 +133,35 @@ Note our usage of other libraries when applicable :3
     | np.uint   | 4-8 bytes (auto) |
     | np.uintc  | 4 bytes          |
 
-  - Slice  
-  - Ellipses  
+  - Slice and Ellipses  
+    The custom types are designed to support the following kinds of indexing:  
+
+  |  Structure                                 |  Type    | Function call                                       | Treated as                    |  
+  |:-------------------------------------------|:---------|:----------------------------------------------------|:------------------------------|
+  | `obj[ np.uint32 ]`                         | Index    | `obj.__getitem__( np.uint32 )`                      | `x`                           |
+  | `obj[ np.uint32 : ]`                       | Slice    | `obj.__getitem__( slice( uint32, None, None))`      | `x -> max`                    |
+  | `obj[ : np.uint32 ]`                       | Slice    | `obj.__getitem__( slice( None, uint32, None))`      | `min -> x`                    |
+  | `obj[ np.uint32 : np.uint32 ]`             | Slice    | `obj.__getitem__( slice( uint32, uint32, None))`    | `x -> y`                      |
+  | `obj[ np.uint32 : np.uint32 : ]`           | Slice    | `obj.__getitem__( slice( uint32, uint32, None))`    | `x -> y`                      |
+  | `obj[ np.uint32 : : np.uint32 ]`           | Slice    | `obj.__getitem__( slice( uint32, None, uint32))`    | `x -> max, in steps of z`     |
+  | `obj[ : np.uint32 : np.uint32 ]`           | Slice    | `obj.__getitem__( slice( None, uint32, uint32))`    | `min -> x, in steps of y`     |
+  | `obj[ : np.uint32 : ]`                     | Slice    | `obj.__getitem__( slice( None, uint32, None))`      | `min -> x`                    |
+  | `obj[ np.uint32 : np.uint32 : ]`           | Slice    | `obj.__getitem__( slice( uint32, None, None))`      | `x -> max`                    |
+  | `obj[ np.uint32 : np.uint32 : np.uint32 ]` | Slice    | `obj.__getitem__( slice( uint32, None, None))`      | `x -> max`                    |
+  | `obj[ : : ]`                               | Slice    | `obj.__getitem__( slice( None, None, None))`        | Raise `ValueError`            |
+  | `obj[ : ]`                                 | Slice    | `obj.__getitem__( slice( None, None, None))`        | Raise `ValueError`            |
+  | `obj[ ... ]`                               | Ellipses | `obj.__getitem__(( Ellipses ))`                     | `min -> max`                  |
+  | `obj[ ..., np.uint32 ]`                    | Ellipses | `obj.__getitem__(( Ellipses, uint32 ))`             | `min -> x`                    |
+  | `obj[ np.uint32, ... ]`                    | Ellipses | `obj.__getitem__(( uint32, Ellipses ))`             | `x -> max`                    |
+  | `obj[ np.uint32, ..., np.uint32 ]`         | Ellipses | `obj.__getitem__(( uint32, Ellipses, uint32 ))`     | `x -> y`                      |
+  | `obj[ ..., np.uint32, ... ]`               | Ellipses | `obj.__getitem__(( Ellipses, uint32, Ellipses ))`   | `min -> max (must include x)` |
+  | `obj[ ..., np.uint32, np.uint32 ]`         | Ellipses | `obj.__getitem__(( Ellipses, uint32, uint32 ))`     | `min -> y (must include x)`   |
+  | `obj[ np.uint32, np.uint32, ... ]`         | Ellipses | `obj.__getitem__(( uint32, uint32, Ellipses ))`     | `x -> y`                      |
+  | `obj[ np.uint32, ..., ... ]`               | Ellipses | `obj.__getitem__(( uint32, Ellipses ))`             | `x -> max`                    |
+  | `obj[ ..., ..., ... ]`                     | Ellipses | `obj.__getitem__(( Ellipses, Ellipses, Ellipses ))` | `min -> max`                  |
+  | `obj[ ..., ... ]`                          | Ellipses | `obj.__getitem__(( Ellipses, Ellipses ))`           | `min -> max`                  |
+  | `obj[ ... ]`                               | Ellipses | `obj.__getitem__( Ellipses )`                       | `min -> max`                  |
+
   - Helper function  
 
     Theres a helper function, `Types.index_encode()` which i heavily suggest using.  
