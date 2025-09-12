@@ -150,7 +150,7 @@ Note our usage of other libraries when applicable :3
   | `obj[ np.uint32 : np.uint32 : np.uint32 ]` | Slice    | `obj.__getitem__( slice( uint32, None, None))`      | `x -> max`                    |  
   | `obj[ : : ]`                               | Slice    | `obj.__getitem__( slice( None, None, None))`        | Raise `ValueError`            |  
   | `obj[ : ]`                                 | Slice    | `obj.__getitem__( slice( None, None, None))`        | Raise `ValueError`            |  
-  | `obj[ ... ]`                               | Ellipses | `obj.__getitem__(( Ellipses ))`                     | `min -> max`                  |  
+  | `obj[ ... ]`                               | Ellipses | `obj.__getitem__( Ellipses )`                     | `min -> max`                  |  
   | `obj[ ..., np.uint32 ]`                    | Ellipses | `obj.__getitem__(( Ellipses, uint32 ))`             | `min -> x`                    |  
   | `obj[ np.uint32, ... ]`                    | Ellipses | `obj.__getitem__(( uint32, Ellipses ))`             | `x -> max`                    |  
   | `obj[ np.uint32, ..., np.uint32 ]`         | Ellipses | `obj.__getitem__(( uint32, Ellipses, uint32 ))`     | `x -> y`                      |  
@@ -160,7 +160,6 @@ Note our usage of other libraries when applicable :3
   | `obj[ np.uint32, ..., ... ]`               | Ellipses | `obj.__getitem__(( uint32, Ellipses ))`             | `x -> max`                    |  
   | `obj[ ..., ..., ... ]`                     | Ellipses | `obj.__getitem__(( Ellipses, Ellipses, Ellipses ))` | `min -> max`                  |  
   | `obj[ ..., ... ]`                          | Ellipses | `obj.__getitem__(( Ellipses, Ellipses ))`           | `min -> max`                  |  
-  | `obj[ ... ]`                               | Ellipses | `obj.__getitem__( Ellipses )`                       | `min -> max`                  |  
 
   - Helper function  
 
