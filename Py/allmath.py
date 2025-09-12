@@ -92,7 +92,7 @@ class UInt8192:
 		return self
 
 	def __truediv__(self, other: UInt8192)->UInt8192: #I am unsure how this will be done with the current methods of doing arithmetic - Smol
-		return self
+		return self									# Whenever ive finished floats, we can use them. although itruediv may have to cast into  float - DVP
 
 	def __itruediv__(self, other: UInt8192)->UInt8192:
 		return self
@@ -397,10 +397,10 @@ class Float8192:
 	def __itruediv__(self, other: Float8192)->Float8192:
 		return self
 
-	def __floordiv__(self, other: Float8192)->Float8192:\
+	def __floordiv__(self, other: Float8192)->Float8192:
 		return self
 
-	def __ifloordiv__(self, other: Float8192)->Float8192:\
+	def __ifloordiv__(self, other: Float8192)->Float8192:
 		return self
 
 	def __mod__(self, other: Float8192)->Float8192:
@@ -514,7 +514,7 @@ class Float8192:
 			self.mantissa <<= shift
 			self.exponent -= 1
 
-	def __getitem__(self)-> Union[np.bool_, np.uint8, np.uint16, np.uint32, np.uint64]:
+	def __getitem__(self)-> Types.uintsUnion64:
 		...
 
 	def __setitem__(self)->Float8192:
@@ -704,7 +704,7 @@ class Types:
 
 
 class MathF:
-	"""Functions and supporting variables, such as type unions/tuples"""
+	"""Functions and supporting variables"""
 
 
 	def frexp(bigint: Types.bigIntsUnion64|Types.bigIntsUnion32)->tuple[np.ndarray[int, np.uint64|np.uint32], int]:
@@ -720,18 +720,18 @@ class MathF:
 		return normalized, exponent
 
 	indexmodes = {
-		'bit'		:0b00000,
-		'nybble'	:0b00001,
-		'byte'		:0b00010,
-		'word'		:0b00011,
-		'dword'		:0b00100,
-		'qword'		:0b00101,
-		'uint128'	:0b00110,
-		'uint256'	:0b00111,
-		'uint512'	:0b01000,
-		'uint1024'	:0b01001,
-		'uint2048'	:0b01010,
-		'uint4096'	:0b01011,
+		'bit'		:0b00000, # returns a np.uint8
+		'nybble'	:0b00001, # returns a np.uint8
+		'byte'		:0b00010, # returns a np.uint8
+		'word'		:0b00011, # returns a np.uint16
+		'dword'		:0b00100, # returns a np.uint32
+		'qword'		:0b00101, # returns a np.uint64
+		'uint128'	:0b00110, # returns a Types.UInt128
+		'uint256'	:0b00111, # returns a Types.UInt256
+		'uint512'	:0b01000, # returns a Types.UInt512
+		'uint1024'	:0b01001, # returns a Types.UInt1024
+		'uint2048'	:0b01010, # returns a Types.UInt2048
+		'uint4096'	:0b01011, # returns a Types.UInt4096
 		#! and more is coming in later versions
 	}
 
