@@ -234,107 +234,113 @@ class UInt8192:
 	def __len__(self)->np.uint8:
 		return np.uint8(1024)
 
-	def __getitem__(self, index = np.uint32)-> Types.allUIntsUnion:
-		check = Types.index_validate(index)
-		if check[0] == np.uint8(0):
-			version, modeval, sign, chunkselect, endianness, indexvalue = Types.index_decode(index)
-			version		 = np.uint8(version)
-			modeval		 = np.uint8(modeval)
-			sign		 = np.uint8(sign)
-			chunkselect  = np.uint8(chunkselect)
-			endianness	 = np.uint8(endianness)
-			indexvalue	 = np.uint16(indexvalue)
-			if version == 1:
-				match indexvalue:
-					case _ if modeval == np.uint8(0)  and indexvalue >= np.uint16(8192): # just in case you dont rember the mode chart
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when bit indexing")
-					case _ if modeval == np.uint8(1)  and indexvalue >= np.uint16(2048):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when nybble indexing")
-					case _ if modeval == np.uint8(2)  and indexvalue >= np.uint16(1024):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when byte indexing")
-					case _ if modeval == np.uint8(3)  and indexvalue >= np.uint16(512):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when Word indexing")
-					case _ if modeval == np.uint8(4)  and indexvalue >= np.uint16(256):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when DWord indexing")
-					case _ if modeval == np.uint8(5)  and indexvalue >= np.uint16(128):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when QWord indexing")
-					case _ if modeval == np.uint8(6)  and indexvalue >= np.uint16(64):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt128 indexing")
-					case _ if modeval == np.uint8(7)  and indexvalue >= np.uint16(32):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt256 indexing")
-					case _ if modeval == np.uint8(8)  and indexvalue >= np.uint16(16):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt512 indexing")
-					case _ if modeval == np.uint8(9)  and indexvalue >= np.uint16(8):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt1024 indexing")
-					case _ if modeval == np.uint8(10) and indexvalue >= np.uint16(4):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt2048 indexing")
-					case _ if modeval == np.uint8(11) and indexvalue >= np.uint16(2):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt4096 indexing")
-					case _: raise ValueError(f"Value not supported for version 1 indexing of {type(self)}")
-				try:
-					match modeval:
-						case np.uint8(0): # bit indexing
-							number = np.uint64(indexvalue) % 64
-							element = self.chunks[indexvalue // 64]
-							mask = np.uint64(1) << number
-							return element & mask
-						case np.uint8(1): # nybble indexing
-							number = np.uint64(indexvalue) % 16
-							element = self.chunks[indexvalue // 16]
-							mask = np.uint64(0xF) << (number * 4) # shift is multiplied with the amount of return bits :3
-							return element & mask
-						case np.uint8(2): # byte indexing
-							number = np.uint64(indexvalue) % 8
-							element = self.chunks[indexvalue // 8]
-							mask = np.uint64(0xFF) << (number * 8)
-							return element & mask
-						case np.uint8(3): # word indexing
-							number = np.uint64(indexvalue) % 4
-							element = self.chunks[indexvalue // 4]
-							mask = np.uint64(0xFFFF) << (number * 16)
-							return element & mask
-						case np.uint8(4): # dword indexing
-							number = np.uint64(indexvalue) % 2
-							element = self.chunks[indexvalue // 2]
-							mask = np.uint64(0xFFFFFFFF) << (number * 32)
-							return element & mask
-						case np.uint8(5): # qword / chunk indexing
-							return self.chunks[indexvalue]
-						#? further returns require lower biguints added, but ill set up for it now anyways
-						case np.uint8(6): # UInt128 indexing
-							value = Types.UInt128(0) #! Just realized these are gonna require recursive indexing... Fuck me. Hard.
-							for i in range(2): #! also i cant explain this for some reason but like ik this is a hard requirement. trust me bro
-								value[i] = self.chunks[(indexvalue * 2) + i]
-							return value
-						case np.uint8(7): # UInt256 indexing
-							value = Types.UInt256(0)
-							for i in range(4):
-								value[i] = self.chunks[(indexvalue * 4) + i]
-							return value
-						case np.uint8(8): # UInt512 indexing
-							value = Types.UInt512(0)
-							for i in range(8):
-								value[i] = self.chunks[(indexvalue * 8) + i]
-							return value
-						case np.uint8(9): # UInt1024 indexing
-							value = Types.UInt1024(0)
-							for i in range(16):
-								value[i] = self.chunks[(indexvalue * 16) + i]
-							return value
-						case np.uint8(10): # UInt2048 indexing
-							value = Types.UInt2048(0)
-							for i in range(32):
-								value[i] = self.chunks[(indexvalue * 32) + i]
-							return value
-						case np.uint8(11): # UInt4096 indexing
-							value = Types.UInt4096(0)
-							for i in range(64): #! I am actively convincing myself that this will actually work and i dont like it
-								value[i] = self.chunks[(indexvalue * 64) + i]
-							return value
-						case _: raise ValueError(f"Indexing type not supported by version 1 indexing of {type(self)}")
-				except IndexError: raise IndexError("Index value is out of bounds for index type")
-			else: raise NotImplementedError("Version 2 has not been implemented for this version yet.")
-		else: raise check[1]
+	def __getitem__(self, indexer = 
+			slice[np.uint32|None,np.uint32|None,np.uint32|None] | np.uint32 |
+			tuple[Ellipsis|None|np.uint32, Ellipsis|None|np.uint32, Ellipsis|None|np.uint32] |
+			tuple[Ellipsis|None|np.uint32, Ellipsis|None|np.uint32] | Ellipsis|None|np.uint32
+			)-> Types.allUIntsUnion:
+		if type(indexer) == np.uint32:
+			index = indexer
+			check = Types.index_validate(index)
+			if check[0] == np.uint8(0):
+				version, modeval, sign, chunkselect, endianness, indexvalue = Types.index_decode(index)
+				version		 = np.uint8(version)
+				modeval		 = np.uint8(modeval)
+				sign		 = np.uint8(sign)
+				chunkselect  = np.uint8(chunkselect)
+				endianness	 = np.uint8(endianness)
+				indexvalue	 = np.uint16(indexvalue)
+				if version == 1:
+					match indexvalue:
+						case _ if modeval == np.uint8(0)  and indexvalue >= np.uint16(8192): # just in case you dont rember the mode chart
+							raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when bit indexing")
+						case _ if modeval == np.uint8(1)  and indexvalue >= np.uint16(2048):
+							raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when nybble indexing")
+						case _ if modeval == np.uint8(2)  and indexvalue >= np.uint16(1024):
+							raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when byte indexing")
+						case _ if modeval == np.uint8(3)  and indexvalue >= np.uint16(512):
+							raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when Word indexing")
+						case _ if modeval == np.uint8(4)  and indexvalue >= np.uint16(256):
+							raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when DWord indexing")
+						case _ if modeval == np.uint8(5)  and indexvalue >= np.uint16(128):
+							raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when QWord indexing")
+						case _ if modeval == np.uint8(6)  and indexvalue >= np.uint16(64):
+							raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt128 indexing")
+						case _ if modeval == np.uint8(7)  and indexvalue >= np.uint16(32):
+							raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt256 indexing")
+						case _ if modeval == np.uint8(8)  and indexvalue >= np.uint16(16):
+							raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt512 indexing")
+						case _ if modeval == np.uint8(9)  and indexvalue >= np.uint16(8):
+							raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt1024 indexing")
+						case _ if modeval == np.uint8(10) and indexvalue >= np.uint16(4):
+							raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt2048 indexing")
+						case _ if modeval == np.uint8(11) and indexvalue >= np.uint16(2):
+							raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt4096 indexing")
+						case _: raise ValueError(f"Value not supported for version 1 indexing of {type(self)}")
+					try:
+						match modeval:
+							case np.uint8(0): # bit indexing
+								number = np.uint64(indexvalue) % 64
+								element = self.chunks[indexvalue // 64]
+								mask = np.uint64(1) << number
+								return element & mask
+							case np.uint8(1): # nybble indexing
+								number = np.uint64(indexvalue) % 16
+								element = self.chunks[indexvalue // 16]
+								mask = np.uint64(0xF) << (number * 4) # shift is multiplied with the amount of return bits :3
+								return element & mask
+							case np.uint8(2): # byte indexing
+								number = np.uint64(indexvalue) % 8
+								element = self.chunks[indexvalue // 8]
+								mask = np.uint64(0xFF) << (number * 8)
+								return element & mask
+							case np.uint8(3): # word indexing
+								number = np.uint64(indexvalue) % 4
+								element = self.chunks[indexvalue // 4]
+								mask = np.uint64(0xFFFF) << (number * 16)
+								return element & mask
+							case np.uint8(4): # dword indexing
+								number = np.uint64(indexvalue) % 2
+								element = self.chunks[indexvalue // 2]
+								mask = np.uint64(0xFFFFFFFF) << (number * 32)
+								return element & mask
+							case np.uint8(5): # qword / chunk indexing
+								return self.chunks[indexvalue]
+							#? further returns require lower biguints added, but ill set up for it now anyways
+							case np.uint8(6): # UInt128 indexing
+								value = Types.UInt128(0) #! Just realized these are gonna require recursive indexing... Fuck me. Hard.
+								for i in range(2): #! also i cant explain this for some reason but like ik this is a hard requirement. trust me bro
+									value[i] = self.chunks[(indexvalue * 2) + i]
+								return value
+							case np.uint8(7): # UInt256 indexing
+								value = Types.UInt256(0)
+								for i in range(4):
+									value[i] = self.chunks[(indexvalue * 4) + i]
+								return value
+							case np.uint8(8): # UInt512 indexing
+								value = Types.UInt512(0)
+								for i in range(8):
+									value[i] = self.chunks[(indexvalue * 8) + i]
+								return value
+							case np.uint8(9): # UInt1024 indexing
+								value = Types.UInt1024(0)
+								for i in range(16):
+									value[i] = self.chunks[(indexvalue * 16) + i]
+								return value
+							case np.uint8(10): # UInt2048 indexing
+								value = Types.UInt2048(0)
+								for i in range(32):
+									value[i] = self.chunks[(indexvalue * 32) + i]
+								return value
+							case np.uint8(11): # UInt4096 indexing
+								value = Types.UInt4096(0)
+								for i in range(64): #! I am actively convincing myself that this will actually work and i dont like it
+									value[i] = self.chunks[(indexvalue * 64) + i]
+								return value
+							case _: raise ValueError(f"Indexing type not supported by version 1 indexing of {type(self)}")
+					except IndexError: raise IndexError("Index value is out of bounds for index type")
+				else: raise NotImplementedError("Version 2 has not been implemented for this version yet.")
+			else: raise check[1]
 
 	def __setitem__(self)->UInt8192:
 		return self
@@ -720,18 +726,18 @@ class MathF:
 		return normalized, exponent
 
 	indexmodes = {
-		'bit'		:0b00000, # returns a np.uint8
-		'nybble'	:0b00001, # returns a np.uint8
-		'byte'		:0b00010, # returns a np.uint8
-		'word'		:0b00011, # returns a np.uint16
-		'dword'		:0b00100, # returns a np.uint32
-		'qword'		:0b00101, # returns a np.uint64
-		'uint128'	:0b00110, # returns a Types.UInt128
-		'uint256'	:0b00111, # returns a Types.UInt256
-		'uint512'	:0b01000, # returns a Types.UInt512
-		'uint1024'	:0b01001, # returns a Types.UInt1024
-		'uint2048'	:0b01010, # returns a Types.UInt2048
-		'uint4096'	:0b01011, # returns a Types.UInt4096
+		'bit'		:0b00000, # np.uint8
+		'nybble'	:0b00001, # np.uint8
+		'byte'		:0b00010, # np.uint8
+		'word'		:0b00011, # np.uint16
+		'dword'		:0b00100, # np.uint32
+		'qword'		:0b00101, # np.uint64
+		'uint128'	:0b00110, # Types.UInt128
+		'uint256'	:0b00111, # Types.UInt256
+		'uint512'	:0b01000, # Types.UInt512
+		'uint1024'	:0b01001, # Types.UInt1024
+		'uint2048'	:0b01010, # Types.UInt2048
+		'uint4096'	:0b01011, # Types.UInt4096
 		#! and more is coming in later versions
 	}
 
