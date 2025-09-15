@@ -361,10 +361,10 @@ class Float8192:
 
 	MAX = (1 << 1024) -1
 
-	def __init__(self, value: int = 0):
+	def __init__(self, value: int|Types.uintsUnion64|Types.uintsUnion32 = 0, *, precision: int|Types.uintsUnion64|Types.uintsUnion32 = 16):
 		self.sign = 1
-		self.mantissa = np.zeros(128, dtype=np.uint64)
-		self.exponent = np.int16(0)
+		self.mantissa = np.zeros(127, dtype=np.uint64)
+		self.exponent = np.int16(precision)
 		self._from_float(value)
 
 	def _from_float(self, value: int = 0):

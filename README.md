@@ -5,6 +5,18 @@ Note our usage of other libraries when applicable :3
 
 ## Python Implementation  
 
+### Table of Contents  
+
+- [all.mathematics](#allmathematics)
+  - [Python Implementation](#python-implementation)
+    - [Table of Contents](#table-of-contents)
+    - [Types](#types)
+    - [Values](#values)
+    - [Memory management](#memory-management)
+      - [Notes](#notes)
+      - [Overhead](#overhead)
+      - [Total RAM usage by type](#total-ram-usage-by-type)
+
 ---  
 
 ### Types  
@@ -120,7 +132,7 @@ Note our usage of other libraries when applicable :3
       | 0b01100...0b01111    | 12-15            | Reserved | 0                             |
   
   - The returned values from indexing/slicing will be the corresponding value, such as a big uint type, a np.uint8 for small values, etc.
-    - This is purely a memory savings optimization. See the chart below for my reason to do this.  
+    - This is purely a memory savings optimization. See the chart below for my reason to do this. I also have a chart further down at [Memory management](#memory-management) which covers memory management in more detail.  
 
     | Type      | Size in RAM      |
     |-----------|------------------|
@@ -148,8 +160,8 @@ Note our usage of other libraries when applicable :3
   | `obj[ : np.uint32 : ]`                     | Slice    | `obj.__getitem__( slice( None, uint32, None))`      | `min -> x`                    |  
   | `obj[ np.uint32 : np.uint32 : ]`           | Slice    | `obj.__getitem__( slice( uint32, None, None))`      | `x -> max`                    |  
   | `obj[ np.uint32 : np.uint32 : np.uint32 ]` | Slice    | `obj.__getitem__( slice( uint32, None, None))`      | `x -> max`                    |  
-  | `obj[ : : ]`                               | Slice    | `obj.__getitem__( slice( None, None, None))`        | Raise `ValueError`            |  
-  | `obj[ : ]`                                 | Slice    | `obj.__getitem__( slice( None, None, None))`        | Raise `ValueError`            |  
+  | `obj[ : : ]`                               | Slice    | `obj.__getitem__( slice( None, None, None))`        | `raise ValueError`            |  
+  | `obj[ : ]`                                 | Slice    | `obj.__getitem__( slice( None, None, None))`        | `raise ValueError`            |  
   | `obj[ ... ]`                               | Ellipses | `obj.__getitem__( Ellipses )`                       | `min -> max`                  |  
   | `obj[ ..., np.uint32 ]`                    | Ellipses | `obj.__getitem__(( Ellipses, uint32 ))`             | `min -> x`                    |  
   | `obj[ np.uint32, ... ]`                    | Ellipses | `obj.__getitem__(( uint32, Ellipses ))`             | `x -> max`                    |  
@@ -177,3 +189,92 @@ Note our usage of other libraries when applicable :3
 - Logic
   - Per now uses other types' logic for most things  
 - ...  
+
+### Memory management  
+
+Refer to these tables for most cases. additional information is found below.  
+
+| Type              | Memory usage in bits | Memory usage in bytes | Cleartext |  
+|:------------------|:---------------------|:----------------------|----------:|  
+| `Types.UInt8192`  | 8192                 | 1024                  | 1 kB      |  
+| `Types.UInt4096`  | 4096                 | 512                   | 512 B     |  
+| `Types.UInt2048`  | 2048                 | 256                   | 256 B     |  
+| `Types.UInt1024`  | 1024                 | 128                   | 128 B     |  
+| `Types.UInt512`   | 512                  | 64                    | 64 B      |  
+| `Types.UInt256`   | 256                  | 32                    | 32 B      |  
+| `Types.UInt128`   | 128                  | 16                    | 16 B      |  
+| `np.uint64`       | 64                   | 8                     | 8 B       |  
+| `np.uint`         | 64 / 32              | 8 / 4                 | 8 B / 4 B |  
+| `np.uint32`       | 32                   | 4                     | 4 B       |  
+| `np.uintc`        | 32                   | 4                     | 4 B       |  
+| `np.uint16`       | 16                   | 2                     | 2 B       |  
+| `np.uint8`        | 8                    | 1                     | 1 B       |  
+| `Types.Int8192`   | 8192                 | 1024                  | 1 kB      |  
+| `Types.Int4096`   | 4096                 | 512                   | 512 B     |  
+| `Types.Int2048`   | 2048                 | 256                   | 256 B     |  
+| `Types.Int1024`   | 1024                 | 128                   | 128 B     |  
+| `Types.Int512`    | 512                  | 64                    | 64 B      |  
+| `Types.Int256`    | 256                  | 32                    | 32 B      |  
+| `Types.Int128`    | 128                  | 16                    | 16 B      |  
+| `np.int64`        | 64                   | 8                     | 8 B       |  
+| `np.int`          | 64 / 32              | 8 / 4                 | 8 B / 4 B |  
+| `np.int32`        | 32                   | 4                     | 4 B       |  
+| `np.intc`         | 32                   | 4                     | 4 B       |  
+| `np.int16`        | 16                   | 2                     | 2 B       |  
+| `np.int8`         | 8                    | 1                     | 1 B       |  
+| `Types.Float8192` | 8208                 | 1026                  | 1 kB      |  
+| `Types.Float4096` | 4112                 | 514                   | 514 B     |  
+| `Types.Float2048` | 2064                 | 258                   | 258 B     |  
+| `Types.Float1024` | 1040                 | 130                   | 130 B     |  
+| `Types.Float512`  | 528                  | 66                    | 66 B      |  
+| `Types.Float256`  | 272                  | 34                    | 34 B      |  
+| `Types.Float128`  | 144                  | 18                    | 18 B      |  
+| `np.float128`     | 128                  | 16                    | 16 B      |  
+| `np.float96`      | 96                   | 12                    | 12 B      |  
+| `np.float64`      | 64                   | 8                     | 8 B       |  
+| `np.float32`      | 32                   | 4                     | 4 B       |  
+| `np.float16`      | 16                   | 2                     | 2 B       |  
+
+#### Notes  
+
+The bigfloat types use an equivalent bigint and a fitting pointer: e.g. a `Float8192` uses an `Int8192` and a `np.uint16`  
+The memory usage is equivalent to these two separately; thus 1 kB + 2 B = 1026 B ≅ 1 kB  
+This just allows for a different convention than IEEE 754: Namely that the bit count is the bit count of the MANTISSA.  
+The actual biggest value storable is thus any value fitting in the bigint, and decimal values down to a precision of: the bitcount - 1.  
+The exponent is also just the plain value instead of being biased  
+
+Everything else follows IEEE standards, simply due to being superstructures utilizing numpy's value types and arrays.  
+
+These bigfloats thus represent, e.g. a `Float8192`, between ∓8191.0 and 0.000...01; an arbitrary variable precision of between 8191 and 0 bits.  
+This is accomplished as described above by considering the value to be Mantissa/2^Exponent+{decimal value}  
+That allows for the exponent to define an arbitrary precision, default is 16 bits.  
+In exchange, the exponent cannot be negative, as theres a metaphorical 'slice' from MSB to the exponent, which gives the integer portion,  
+and one from the exponent to LSB, giving the decimal section.  
+
+> This is a keyword argument when creating the float, and i hope to have a way to encode a precision in assignment values ready for version 2.   
+> or yk, make a function or special value for it idfk yet  
+
+#### Overhead  
+
+Below is a table of the estimated memory usage of the overhead and metadata of elements of the types :D  
+
+| Type                               | Overhead size 64-bit | Overhead size 32-bit |  
+|:-----------------------------------|---------------------:|---------------------:|  
+| bigfloats                          | ~48B                 | ~24-28B              |  
+| bigints, biguints                  | ~40B                 | ~20-24B              |  
+| NumPy scalars (uint64, int8, etc.) | ~32-40B              | ~24-28B              |  
+| NumPy arrays (`np.ndarray`)        | ~96-144B             | ~64-100B             |  
+
+Note that this does in fact not include overhead from the contained variables, such as an ndarray with actually data in it.  
+You need to count the overhead of the contained objects, too.  
+
+#### Total RAM usage by type  
+
+This includes the data and overhead for every element in the super structure as well.  
+This is what you should check to see the actual memory usage of the objects you create - simply tally up UwU  
+
+| Type                            | Memory usage                        |  
+|:--------------------------------|------------------------------------:|  
+| UInt8192                        | 1024 + 40 + 144 + 40 * 128 = 6328 B |  
+
+<!-- This is summing up overhead for the contained elements, stored data, and overhead for the type itself -->
