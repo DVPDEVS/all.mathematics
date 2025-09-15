@@ -8,6 +8,8 @@ class UInt8192:
 
 	MAX = (1 << 1024) -1
 
+	__slots__ = ['chunks']
+
 #! Avoiding subclassing int for the fine control applicable now :3
 #? (Im gonna have to create every magic method manually)
 #	def __new__(cls, value)->UInt1024:
@@ -360,10 +362,11 @@ class Float8192:
 	"""This is a fixed-size signed 8192-bit float type. It IMMEDIATELY takes 1KB of ram."""
 
 	MAX = (1 << 1024) -1
+	__slots__ = ['mantissa', 'mantissa_signed', 'exponent']
 
 	def __init__(self, value: int|Types.uintsUnion64|Types.uintsUnion32 = 0, *, precision: int|Types.uintsUnion64|Types.uintsUnion32 = 16):
-		self.sign = 1
 		self.mantissa = np.zeros(127, dtype=np.uint64)
+		self.mantissa_signed = np.array(np.uint64(0), dtype=np.uint64)
 		self.exponent = np.int16(precision)
 		self._from_float(value)
 
@@ -522,7 +525,7 @@ class Float8192:
 			self.exponent -= 1
 
 	def __getitem__(self)-> Types.uintsUnion64:
-		...
+		return self
 
 	def __setitem__(self)->Float8192:
 		return self
@@ -603,7 +606,7 @@ class Types:
 			mask >>= 1
 			mask |= np.uint32(0x8000)
 		indexvalue = index & np.uint32(0xFFFF)
-		indexvaluemasked |= (indexvalue & ~mask)
+		indexvaluemasked = (indexvalue & ~mask)
 		if indexvalue != indexvaluemasked:
 			return np.uint8(0), ValueError("Index is out of range for index type")
 		return np.uint8(1), None
