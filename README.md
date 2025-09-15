@@ -25,8 +25,8 @@ Note our usage of other libraries when applicable :3
 - NumPy ≥1.20.0  
 
 NB! Note on 32-bit systems:  
-32-bit Python should be able to run this library, but memory limitations (~2-3 GB) make it unsuitable for very large  
-arrays or high-precision computation. I recommend using 64-bit Python 3.12+ for either of these usecases if you can.  
+32-bit Python should be able to run this library, but memory limitations (~2-3 GB) make it unsuitable for very  
+large arrays or high-precision computation. I recommend using 64-bit Python 3.12+ for either of these usecases if you can.  
 
 There is explicit support for 32-bit, because i know a lot of people in developing / poorer areas that work with  
 computer science and programming. I wanted this to be usable by everyone.  
