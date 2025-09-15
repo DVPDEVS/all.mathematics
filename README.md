@@ -30,8 +30,8 @@ arrays or high-precision computation. I recommend using 64-bit Python 3.12+ for 
 
 There is explicit support for 32-bit, because i know a lot of people in developing / poorer areas that work with  
 computer science and programming. I wanted this to be usable by everyone.  
-However, if you use a 32-bit version, you will need to manage memory more carefully. I will not limit the power of  
-the library for the majority who use 64-bit versions, but 32-bit users will not be excluded either.  
+However, if you use a 32-bit version, you will need to manage memory more carefully. I will not limit the power  
+of the library for the majority who use 64-bit versions, but 32-bit users will not be excluded either.  
 
 ### Version Notices  
 
