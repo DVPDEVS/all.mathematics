@@ -640,8 +640,7 @@ class Convert:
 
 # TODO: #79 Rewrite to use np types
 	def b10_uint_to_b05(encoded_digits: Types.uintsUnion32|Types.uintsUnion64 = 0, max_precision: Types.uintsUnion32 = 16) -> tuple[Types.uintsUnion32|Types.uintsUnion64, Types.uintsUnion32]:
-		"""Convert base-10 decimal digits into a binary fixed-point encoded uint where each bit is 0.5^n.\n
-		The number of decimal digits is inferred using __len__"""
+		"""Convert base-10 decimal digits into a binary fixed-point encoded uint where each bit is 0.5^n"""
 
 		if encoded_digits == 0:
 			return type(encoded_digits)(0), type(encoded_digits)(1)
