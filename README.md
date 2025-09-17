@@ -225,7 +225,8 @@ The bigtypes are in essence wrappers around a set of variables, typically a `np.
           1. `chunks`  
        2. chunks (`ndarray`)  
           1. Zero-initialized `np.uint64`s  
-             1. Count = typesize / 8 / 8  
+          Count = typesize / 8 / 8  
+
           2. `dtype=np.uint64`  
   - Signed Integers  
     1. Type wrapper  
@@ -234,7 +235,8 @@ The bigtypes are in essence wrappers around a set of variables, typically a `np.
           2. `sign_chunk`  
        2. chunks (`ndarray`)  
           1. Zero-initialized `np.uint64`s  
-             1. Count = ( typesize / 8 / 8 ) - 1  
+          Count = ( typesize / 8 / 8 ) - 1  
+
           2. `dtype=np.uint64`  
        3. sign_chunk (`np.int64`)  
           1. Zero-initialized  
@@ -246,7 +248,8 @@ The bigtypes are in essence wrappers around a set of variables, typically a `np.
           3. `exponent`  
        2. mantissa (`ndarray`)  
           1. Zero-initialized `np.uint64`s  
-             1. Count = ( typesize / 8 / 8 ) - 1  
+          Count = ( typesize / 8 / 8 ) - 1  
+
           2. `dtype=np.uint64`  
        3. mantissa_signed (`np.int64`)  
           1. Zero-initialized  
@@ -259,7 +262,8 @@ The bigtypes are in essence wrappers around a set of variables, typically a `np.
           1. `chunks`  
        2. chunks (`ndarray`)  
           1. Zero-initialized `np.uint32`s  
-             1. Count = typesize / 8 / 4  
+          Count = typesize / 8 / 4  
+
           2. `dtype=np.uint32`  
   - Signed Integers  
     1. Type wrapper  
@@ -268,7 +272,8 @@ The bigtypes are in essence wrappers around a set of variables, typically a `np.
           2. `sign_chunk`  
        2. chunks (`ndarray`)  
           1. Zero-initialized `np.uint32`s  
-             1. Count = ( typesize / 8 / 4 ) - 1  
+          Count = ( typesize / 8 / 4 ) - 1  
+
           2. `dtype=np.uint32`  
        3. sign_chunk (`np.int32`)  
           1. Zero-initialized  
@@ -280,12 +285,37 @@ The bigtypes are in essence wrappers around a set of variables, typically a `np.
           3. `exponent`  
        2. mantissa (`ndarray`)  
           1. Zero-initialized `np.uint32`s  
-             1. Count = ( typesize / 8 / 4 ) - 1  
+          Count = ( typesize / 8 / 4 ) - 1  
+
           2. `dtype=np.uint32`  
        3. mantissa_signed (`np.int32`)  
           1. Zero-initialized  
        4. exponent (`np.uint16`)  
           1. Initialized to a keyword argument, `precision`, which defaults to `16`  
+
+Example type structure: `Types.Float128`;  
+
+```py
+class Float128:
+  __slots__ = ['mantissa', 'mantissa_signed', 'exponent']
+
+  def __init__(self, value: int|Types.uintsUnion64|Types.uintsUnion32 = 0, *, 
+      precision: int|Types.uintsUnion64|Types.uintsUnion32 = 16):
+    self.mantissa = np.uint64(0)
+    self.mantissa_signed = np.int64(0)
+    self.exponent = np.uint16(precision)
+```
+
+Example type structure: `Types.Int2048H`;  
+
+```py
+class Int2048H:
+  __slots__ = ['chunks', 'signed_chunk']
+
+  def __init__(self, value: int|Types.uintsUnion32 = 0):
+    self.chunks = np.zeros(63, dtype=np.uint32)
+    self.signed_chunk = np.int32(0)
+```
 
 ### Memory management  
 
