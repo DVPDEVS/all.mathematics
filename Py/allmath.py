@@ -93,9 +93,11 @@ class UInt8192:
 			self.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
 		return self
 
+# TODO: #78 UINT
 	def __truediv__(self, other: UInt8192)->UInt8192: #I am unsure how this will be done with the current methods of doing arithmetic - Smol
 		return self									# Whenever ive finished floats, we can use them. although itruediv may have to cast into  float - DVP
 
+# TODO: #77 UINT 
 	def __itruediv__(self, other: UInt8192)->UInt8192:
 		return self
 
@@ -137,45 +139,59 @@ class UInt8192:
 			self.chunks[i] = total & 0xFFFFFFFFFFFFFFFF
 		return self
 
+# TODO: #76 UINT 
 	def __pow__(self, other: UInt8192)->UInt8192:
 		return self
 
+# TODO: #75 UINT 
 	def __ipow__(self, other: UInt8192)->UInt8192:
 		return self
 
+# TODO: #74 UINT 
 	def __neg__(self)->UInt8192:
 		return self
 
+# TODO: #73 UINT 
 	def __pos__(self)->UInt8192:
 		return self
 
+# TODO: #72 UINT 
 	def __and__(self)->UInt8192:
 		return self
 
+# TODO: #71 UINT 
 	def __or__(self)->UInt8192:
 		return self
 
+# TODO: #70 UINT 
 	def __xor__(self)->UInt8192:
 		return self
 
+# TODO: #69 UINT 
 	def __lshift__(self)->UInt8192:
 		return self
 
+# TODO: #68 UINT 
 	def __rshift__(self)->UInt8192:
 		return self
 
+# TODO: #67 UINT 
 	def __iand__(self)->UInt8192:
 		return self
 
+# TODO: #66 UINT 
 	def __ior__(self)->UInt8192:
 		return self
 
+# TODO: #65 UINT 
 	def __ixor__(self)->UInt8192:
 		return self
 
+# TODO: #64 UINT 
 	def __ilshift__(self)->UInt8192:
 		return self
 
+# TODO: #63 UINT 
 	def __irshift__(self)->UInt8192:
 		return self
 
@@ -185,57 +201,68 @@ class UInt8192:
 				return False
 		return True
 
+# TODO: #62 UINT 
 	def __ne__(self, other: UInt8192)->bool:
 		for i in range(128):
 			if int(self.chunks[i]) != int(other.chunks[i]):
 				return False
 		return True
 
+# TODO: #61 UINT 
 	def __lt__(self, other: UInt8192)->bool:
 		for i in range(128):
 			if int(self.chunks[i]) != int(other.chunks[i]):
 				return False
 		return True
 
+# TODO: #60 UINT 
 	def __le__(self, other: UInt8192)->bool:
 		for i in range(128):
 			if int(self.chunks[i]) != int(other.chunks[i]):
 				return False
 		return True
 
+# TODO: #59 UINT 
 	def __gt__(self, other: UInt8192)->bool:
 		for i in range(128):
 			if int(self.chunks[i]) != int(other.chunks[i]):
 				return False
 		return True
 
+# TODO: #58 UINT 
 	def __ge__(self, other: UInt8192)->bool:
 		for i in range(128):
 			if int(self.chunks[i]) != int(other.chunks[i]):
 				return False
 		return True
 
+# TODO: #57 UINT 
 	def __del__(self)->UInt8192:
 		return self
 
+# TODO: #56 UINT 
 	def __int__(self)->int:
 		return self._to_int()
 
+# TODO: #54 UINT 
 	def __bool__(self)->bool:
 		return True if self._to_int() != 0 else False
 
+# TODO: #55 UINT
 	def __str__(self)->str:
 		res = ''
 		for i in range(128):
 			res += str(int(self.chunks[i]))
 		return res
 
+# TODO: #53 UINT 
 	def __bytes__(self)->bytes:
 		return self._to_int().to_bytes(128, 'little')
 
 	def __len__(self)->np.uint8:
 		return np.uint8(1024)
 
+# TODO: #52 UINT 
 	def __getitem__(self, indexer = 
 			slice[np.uint32|None,np.uint32|None,np.uint32|None] |
 			tuple[Ellipsis|np.uint32, Ellipsis|np.uint32, Ellipsis|np.uint32] |
@@ -345,15 +372,19 @@ class UInt8192:
 				else: raise NotImplementedError("Version 2 has not been implemented for this version yet.")
 			else: raise check[1]
 
+# TODO: #51 UINT 
 	def __setitem__(self)->UInt8192:
 		return self
 
+# TODO: #50 UINT 
 	def __contains__(self)->bool:
 		return self
 
+# TODO: #49 UINT 
 	def __copy__(self)->UInt8192:
 		return self
 
+# TODO: #48 UINT 
 	def __sizeof__(self)->int:
 		return self
 
@@ -377,114 +408,151 @@ class Float8192:
 			value >>= 64
 			i += 1
 
+# TODO: #47 FLOAT
 	def _to_int(self)->int:
 		return self
 
+# TODO: #46 FLOAT
 	def __repr__(self):
 		return f"Float8192({''})"
 
+# TODO: #45 FLOAT
 	def __add__(self, other: Float8192)->Float8192:
 		return self
 
+# TODO: #44 FLOAT
 	def __iadd__(self, other: Float8192)->Float8192:
 		return self
 
+# TODO: #43 FLOAT
 	def __mul__(self, other: Float8192)->Float8192:
 		return self
 
+# TODO: #42 FLOAT
 	def __imul__(self, other: Float8192)->Float8192:
 		return self
 
+# TODO: #41 FLOAT
 	def __sub__(self, other: Float8192)->Float8192:
 		return self
 
+# TODO: #40 FLOAT
 	def __isub__(self, other: Float8192)->Float8192:
 		return self
 
+# TODO: #39 FLOAT
 	def __truediv__(self, other: Float8192)->Float8192:
 		return self
 
+# TODO: #38 FLOAT
 	def __itruediv__(self, other: Float8192)->Float8192:
 		return self
 
+# TODO: #37 FLOAT
 	def __floordiv__(self, other: Float8192)->Float8192:
 		return self
 
+# TODO: #36 FLOAT
 	def __ifloordiv__(self, other: Float8192)->Float8192:
 		return self
 
+# TODO: #35 FLOAT
 	def __mod__(self, other: Float8192)->Float8192:
 		return self
 
+# TODO: #34 FLOAT
 	def __imod__(self, other: Float8192)->Float8192:
 		return self
 
+# TODO: #33 FLOAT
 	def __pow__(self, other: Float8192)->Float8192:
 		return self
 
+# TODO: #32 FLOAT
 	def __ipow__(self, other: Float8192)->Float8192:
 		return self
 
+# TODO: #31 FLOAT
 	def __neg__(self)->Float8192:
 		return self
 
+# TODO: #30 FLOAT
 	def __pos__(self)->Float8192:
 		return self
 
+# TODO: #28 FLOAT
 	def __abs__(self)->Float8192:
 		return self
 
+# TODO: #29 FLOAT
 	def __and__(self)->Float8192:
 		return self
 
+# TODO: #27 FLOAT
 	def __or__(self)->Float8192:
 		return self
 
+# TODO: #26 FLOAT
 	def __xor__(self)->Float8192:
 		return self
 
+# TODO: #25 FLOAT
 	def __lshift__(self)->Float8192:
 		return self
 
+# TODO: #24 FLOAT
 	def __rshift__(self)->Float8192:
 		return self
 
+# TODO: #23 FLOAT
 	def __iand__(self)->Float8192:
 		return self
 
+# TODO: #22 FLOAT
 	def __ior__(self)->Float8192:
 		return self
 
+# TODO: #21 FLOAT
 	def __ixor__(self)->Float8192:
 		return self
 
+# TODO: #20 FLOAT
 	def __ilshift__(self)->Float8192:
 		return self
 
+# TODO: #19 FLOAT
 	def __irshift__(self)->Float8192:
 		return self
 
+# TODO: #18 FLOAT
 	def __eq__(self, other: Float8192)->bool:
 		return True
 
+# TODO: #17 FLOAT
 	def __ne__(self, other: Float8192)->bool:
 		return True
 
+# TODO: #16 FLOAT
 	def __lt__(self, other: Float8192)->bool:
 		return True
 
+# TODO: #15 FLOAT
 	def __le__(self, other: Float8192)->bool:
 		return True
 
+# TODO: #14 FLOAT
 	def __gt__(self, other: Float8192)->bool:
 		return True
 
+# TODO: #13 FLOAT
 	def __ge__(self, other: Float8192)->bool:
 		return True
 
+# TODO: FLOAT
 	def __del__(self)->Float8192:
 		return self
 
+# TODO: #12 FLOAT
 	def __int__(self)->int:
 		chunk_size = self.mantissa.itemsize * 8
 		value = 0
@@ -492,18 +560,22 @@ class Float8192:
 			value = (value << chunk_size) | int(self.mantissa[i])
 		return value if getattr(self, "sign", 1) >= 0 else -value
 
+# TODO: #11 FLOAT
 	def __bool__(self)->bool:
 		...
 
+# TODO: #10 FLOAT
 	def __str__(self)->str:
 		res = ''
 		for i in range(128):
 			...
 		return res
 
+# TODO: #9 FLOAT
 	def __bytes__(self)->bytes:
 		return self
 
+# TODO: #8 FLOAT
 	def __len__(self)->int:
 		chunk_size = self.mantissa.itemsize * 8
 		for i in range(len(self.mantissa)-1, -1, -1):
@@ -512,6 +584,7 @@ class Float8192:
 				return i * chunk_size
 		return 0
 
+# TODO: #7 FLOAT
 	def _normalize(self):
 		bitcount = len(self.mantissa)
 		if bitcount == 0:
@@ -524,20 +597,46 @@ class Float8192:
 			self.mantissa <<= shift
 			self.exponent -= 1
 
+# TODO: #6 FLOAT
 	def __getitem__(self)-> Types.uintsUnion64:
 		return self
 
+# TODO: #5 FLOAT
 	def __setitem__(self)->Float8192:
 		return self
 
+# TODO: #4 FLOAT
 	def __contains__(self)->bool:
 		return self
 
+# TODO: #3 FLOAT
 	def __copy__(self)->Float8192:
 		return self
 
+# TODO: #2 FLOAT
 	def __sizeof__(self)->int:
 		return self
+
+
+class Convert:
+	"""Conversion mainly between bases and types"""
+
+	def b05_to_b10_uint(encoded: Types.uintsUnion32|Types.uintsUnion64 = 0, max_precision: Types.uintsUnion32 = 16) -> tuple[Types.uintsUnion32|Types.uintsUnion64, Types.uintsUnion32|Types.uintsUnion64]:
+		"""Convert a decimal fraction encoded in binary fixed-point as base 0.5 into a uint of the decimal digits and the number of digits\n
+		(To avoid losing leading zeros)"""
+		
+		if encoded == 0:
+			return encoded, np.uint8(1)
+		bitcount = len(encoded)
+		denomINATOR = type(encoded)(1) << bitcount #? stupid but works actually
+		numerator = encoded
+		p10 = type(encoded)(1)
+		for d in range(1, max_precision +1):
+			p10 *= 10
+			if (numerator * p10) % denomINATOR == 0: #! wont work until dunder methods have been added (mod)
+				return (numerator * p10) // denomINATOR, d #! wont work until dunder methods have been added (floordiv)
+		#? best guess approximation in case nothing better is found :|
+		return (numerator * p10) // denomINATOR, max_precision #! wont work until dunder methods have been added (floordiv)
 
 
 class Types:
