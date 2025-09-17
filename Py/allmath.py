@@ -621,7 +621,7 @@ class Float8192:
 class Convert:
 	"""Conversion mainly between bases and types"""
 
-	def b05_to_b10_uint(encoded: Types.uintsUnion32|Types.uintsUnion64 = 0, max_precision: Types.uintsUnion32 = 16) -> tuple[Types.uintsUnion32|Types.uintsUnion64, Types.uintsUnion32|Types.uintsUnion64]:
+	def b05_to_b10_uint(encoded: Types.uintsUnion32|Types.uintsUnion64 = 0, max_precision: Types.uintsUnion32 = 16) -> tuple[Types.uintsUnion32|Types.uintsUnion64, Types.uintsUnion32]:
 		"""Convert a decimal fraction encoded in binary fixed-point as base 0.5 into a uint of the decimal digits and the number of digits\n
 		(To avoid losing leading zeros)"""
 		
