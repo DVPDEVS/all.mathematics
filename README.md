@@ -10,9 +10,13 @@ Note our usage of other libraries when applicable :3
 - [all.mathematics](#allmathematics)
   - [Python Implementation](#python-implementation)
     - [Table of Contents](#table-of-contents)
+    - [System requirements](#system-requirements)
+    - [Version Notices](#version-notices)
     - [Types](#types)
     - [Values](#values)
+    - [Structure](#structure)
     - [Memory management](#memory-management)
+      - [Data size / memory usage](#data-size--memory-usage)
       - [Notes](#notes)
       - [Overhead](#overhead)
       - [Total RAM usage by type](#total-ram-usage-by-type)
@@ -210,6 +214,79 @@ My estimate for the largest value storable in v2 is a UInt2097152, or roughly 25
   - Per now uses other types' logic for most things  
 - ...  
 
+### Structure  
+
+The bigtypes are in essence wrappers around a set of variables, typically a `np.ndarray` and some extra bits.  
+
+- 64 bit compatible types  
+  - Unsigned Integers  
+    1. Type wrapper  
+       1. `__slots__`  
+          1. `chunks`  
+       2. chunks (`ndarray`)  
+          1. Zero-initialized `np.uint64`s  
+             1. Count = typesize / 8 / 8  
+          2. `dtype=np.uint64`  
+  - Signed Integers  
+    1. Type wrapper  
+       1. `__slots__`  
+          1. `chunks`  
+          2. `sign_chunk`  
+       2. chunks (`ndarray`)  
+          1. Zero-initialized `np.uint64`s  
+             1. Count = ( typesize / 8 / 8 ) - 1  
+          2. `dtype=np.uint64`  
+       3. sign_chunk (`np.int64`)  
+          1. Zero-initialized  
+  - Floating Point Numbers
+    1. Type wrapper  
+       1. `__slots__`  
+          1. `mantissa`  
+          2. `mantissa_signed`  
+          3. `exponent`  
+       2. mantissa (`ndarray`)  
+          1. Zero-initialized `np.uint64`s  
+             1. Count = ( typesize / 8 / 8 ) - 1  
+          2. `dtype=np.uint64`  
+       3. mantissa_signed (`np.int64`)  
+          1. Zero-initialized  
+       4. exponent (`np.uint16`)  
+          1. Initialized to a keyword argument, `precision`, which defaults to `16`  
+- 32 bit compatible types  
+  - Unsigned Integers  
+    1. Type wrapper  
+       1. `__slots__`  
+          1. `chunks`  
+       2. chunks (`ndarray`)  
+          1. Zero-initialized `np.uint32`s  
+             1. Count = typesize / 8 / 4  
+          2. `dtype=np.uint32`  
+  - Signed Integers  
+    1. Type wrapper  
+       1. `__slots__`  
+          1. `chunks`  
+          2. `sign_chunk`  
+       2. chunks (`ndarray`)  
+          1. Zero-initialized `np.uint32`s  
+             1. Count = ( typesize / 8 / 4 ) - 1  
+          2. `dtype=np.uint32`  
+       3. sign_chunk (`np.int32`)  
+          1. Zero-initialized  
+  - Floating Point Numbers
+    1. Type wrapper  
+       1. `__slots__`  
+          1. `mantissa`  
+          2. `mantissa_signed`  
+          3. `exponent`  
+       2. mantissa (`ndarray`)  
+          1. Zero-initialized `np.uint32`s  
+             1. Count = ( typesize / 8 / 4 ) - 1  
+          2. `dtype=np.uint32`  
+       3. mantissa_signed (`np.int32`)  
+          1. Zero-initialized  
+       4. exponent (`np.uint16`)  
+          1. Initialized to a keyword argument, `precision`, which defaults to `16`  
+
 ### Memory management  
 
 Refer to these tables for most cases. Additional information is found below.  
@@ -218,46 +295,46 @@ Refer to these tables for most cases. Additional information is found below.
 
 > This does not include overhead like metadata, structure, tags, or padding. See below for overhead and total sizes.  
 
-| Type              | Memory usage in bits | Memory usage in bytes | Cleartext |  
-|:------------------|:---------------------|:----------------------|----------:|  
-| `Types.UInt8192`  | 8192                 | 1024                  |      1 kB |  
-| `Types.UInt4096`  | 4096                 | 512                   |     512 B |  
-| `Types.UInt2048`  | 2048                 | 256                   |     256 B |  
-| `Types.UInt1024`  | 1024                 | 128                   |     128 B |  
-| `Types.UInt512`   | 512                  | 64                    |      64 B |  
-| `Types.UInt256`   | 256                  | 32                    |      32 B |  
-| `Types.UInt128`   | 128                  | 16                    |      16 B |  
-| `np.uint64`       | 64                   | 8                     |       8 B |  
-| `np.uint`         | 64 / 32              | 8 / 4                 | 8 B / 4 B |  
-| `np.uint32`       | 32                   | 4                     |       4 B |  
-| `np.uintc`        | 32                   | 4                     |       4 B |  
-| `np.uint16`       | 16                   | 2                     |       2 B |  
-| `np.uint8`        | 8                    | 1                     |       1 B |  
-| `Types.Int8192`   | 8192                 | 1024                  |      1 kB |  
-| `Types.Int4096`   | 4096                 | 512                   |     512 B |  
-| `Types.Int2048`   | 2048                 | 256                   |     256 B |  
-| `Types.Int1024`   | 1024                 | 128                   |     128 B |  
-| `Types.Int512`    | 512                  | 64                    |      64 B |  
-| `Types.Int256`    | 256                  | 32                    |      32 B |  
-| `Types.Int128`    | 128                  | 16                    |      16 B |  
-| `np.int64`        | 64                   | 8                     |       8 B |  
-| `np.int`          | 64 / 32              | 8 / 4                 | 8 B / 4 B |  
-| `np.int32`        | 32                   | 4                     |       4 B |  
-| `np.intc`         | 32                   | 4                     |       4 B |  
-| `np.int16`        | 16                   | 2                     |       2 B |  
-| `np.int8`         | 8                    | 1                     |       1 B |  
-| `Types.Float8192` | 8208                 | 1026                  |      1 kB |  
-| `Types.Float4096` | 4112                 | 514                   |     514 B |  
-| `Types.Float2048` | 2064                 | 258                   |     258 B |  
-| `Types.Float1024` | 1040                 | 130                   |     130 B |  
-| `Types.Float512`  | 528                  | 66                    |      66 B |  
-| `Types.Float256`  | 272                  | 34                    |      34 B |  
-| `Types.Float128`  | 144                  | 18                    |      18 B |  
-| `np.float128`     | 128                  | 16                    |      16 B |  
-| `np.float96`      | 96                   | 12                    |      12 B |  
-| `np.float64`      | 64                   | 8                     |       8 B |  
-| `np.float32`      | 32                   | 4                     |       4 B |  
-| `np.float16`      | 16                   | 2                     |       2 B |  
+| Type              | Data size in bits | Data size in bytes | Cleartext |  
+|:------------------|:------------------|:-------------------|----------:|  
+| `Types.UInt8192`  | 8192              | 1024               |      1 kB |  
+| `Types.UInt4096`  | 4096              | 512                |     512 B |  
+| `Types.UInt2048`  | 2048              | 256                |     256 B |  
+| `Types.UInt1024`  | 1024              | 128                |     128 B |  
+| `Types.UInt512`   | 512               | 64                 |      64 B |  
+| `Types.UInt256`   | 256               | 32                 |      32 B |  
+| `Types.UInt128`   | 128               | 16                 |      16 B |  
+| `np.uint64`       | 64                | 8                  |       8 B |  
+| `np.uint`         | 64 / 32           | 8 / 4              | 8 B / 4 B |  
+| `np.uint32`       | 32                | 4                  |       4 B |  
+| `np.uintc`        | 32                | 4                  |       4 B |  
+| `np.uint16`       | 16                | 2                  |       2 B |  
+| `np.uint8`        | 8                 | 1                  |       1 B |  
+| `Types.Int8192`   | 8192              | 1024               |      1 kB |  
+| `Types.Int4096`   | 4096              | 512                |     512 B |  
+| `Types.Int2048`   | 2048              | 256                |     256 B |  
+| `Types.Int1024`   | 1024              | 128                |     128 B |  
+| `Types.Int512`    | 512               | 64                 |      64 B |  
+| `Types.Int256`    | 256               | 32                 |      32 B |  
+| `Types.Int128`    | 128               | 16                 |      16 B |  
+| `np.int64`        | 64                | 8                  |       8 B |  
+| `np.int`          | 64 / 32           | 8 / 4              | 8 B / 4 B |  
+| `np.int32`        | 32                | 4                  |       4 B |  
+| `np.intc`         | 32                | 4                  |       4 B |  
+| `np.int16`        | 16                | 2                  |       2 B |  
+| `np.int8`         | 8                 | 1                  |       1 B |  
+| `Types.Float8192` | 8208              | 1026               |      1 kB |  
+| `Types.Float4096` | 4112              | 514                |     514 B |  
+| `Types.Float2048` | 2064              | 258                |     258 B |  
+| `Types.Float1024` | 1040              | 130                |     130 B |  
+| `Types.Float512`  | 528               | 66                 |      66 B |  
+| `Types.Float256`  | 272               | 34                 |      34 B |  
+| `Types.Float128`  | 144               | 18                 |      18 B |  
+| `np.float128`     | 128               | 16                 |      16 B |  
+| `np.float96`      | 96                | 12                 |      12 B |  
+| `np.float64`      | 64                | 8                  |       8 B |  
+| `np.float32`      | 32                | 4                  |       4 B |  
+| `np.float16`      | 16                | 2                  |       2 B |  
 
 #### Notes  
 
@@ -281,65 +358,67 @@ and one from the exponent to LSB, giving the decimal section.
 
 #### Overhead  
 
-Below is a table of the estimated memory usage of the overhead and metadata of elements of the types :D  
+Below is a table of the estimated memory usage of the overhead and metadata of types :D  
 
 | Type                               | Overhead size 64-bit | Overhead size 32-bit |  
 |:-----------------------------------|---------------------:|---------------------:|  
-| bigfloats, bigints                 |                 ~48B |              ~24-28B |  
+| bigints                            |                 ~44B |              ~24-28B |  
 | biguints                           |                 ~40B |              ~20-24B |  
+| bigfloats                          |                 ~48B |              ~24-28B |  
 | NumPy scalars (uint64, int8, etc.) |              ~32-40B |              ~24-28B |  
 | NumPy arrays (`np.ndarray`)        |             ~96-144B |             ~64-100B |
+
+This is the overhead for just the element itself. Bigtypes contain several values, each of which have overhead of their own.  
 
 #### Total RAM usage by type  
 
 This includes the data and overhead for every element in the super structure as well.  
 This is what you should check to see the actual memory usage of the objects you create - simply tally up UwU  
 
-| Type         |                Memory usage conjecture |  
-|:-------------|---------------------------------------:|  
-| `UInt8192`   |               1024 + 40 + 144 = 1208 B |  
-| `UInt4096`   |                 512 + 40 + 144 = 696 B |  
-| `UInt2048`   |                 256 + 40 + 144 = 440 B |  
-| `UInt1024`   |                 128 + 40 + 144 = 312 B |  
-| `UInt512`    |                  64 + 40 + 144 = 248 B |  
-| `UInt256`    |                  32 + 40 + 144 = 216 B |  
-| `UInt128`    |                  16 + 40 + 144 = 200 B |  
-| `Int8192`    |          1024 + 48 + 40 + 144 = 1256 B |  
-| `Int4096`    |            512 + 48 + 40 + 144 = 744 B |  
-| `Int2048`    |            256 + 48 + 40 + 144 = 488 B |  
-| `Int1024`    |            128 + 48 + 40 + 144 = 360 B |  
-| `Int512`     |             64 + 48 + 40 + 144 = 296 B |  
-| `Int256`     |             32 + 48 + 40 + 144 = 264 B |  
-| `Int128`     |             16 + 48 + 40 + 144 = 248 B |  
-| `Float8192`  | 2 + 1024 + 48 + 40 + 144 + 28 = 1286 B |  
-| `Float4096`  |   2 + 512 + 48 + 40 + 144 + 28 = 774 B |  
-| `Float2048`  |   2 + 256 + 48 + 40 + 144 + 28 = 478 B |  
-| `Float1024`  |   2 + 128 + 48 + 40 + 144 + 28 = 390 B |  
-| `Float512`   |    2 + 64 + 48 + 40 + 144 + 28 = 326 B |  
-| `Float256`   |    2 + 32 + 48 + 40 + 144 + 28 = 294 B |  
-| `Float128`   |    2 + 16 + 48 + 40 + 144 + 28 = 278 B |  
-| `UInt8192H`  |               1024 + 24 + 100 = 1148 B |  
-| `UInt4096H`  |                 512 + 24 + 100 = 636 B |  
-| `UInt2048H`  |                 256 + 24 + 100 = 380 B |  
-| `UInt1024H`  |                 128 + 24 + 100 = 252 B |  
-| `UInt512H`   |                  64 + 24 + 100 = 188 B |  
-| `UInt256H`   |                  32 + 24 + 100 = 156 B |  
-| `UInt128H`   |                  16 + 24 + 100 = 140 B |  
-| `Int8192H`   |          1024 + 28 + 24 + 100 = 1176 B |  
-| `Int4096H`   |            512 + 28 + 24 + 100 = 664 B |  
-| `Int2048H`   |            256 + 28 + 24 + 100 = 408 B |  
-| `Int1024H`   |            128 + 28 + 24 + 100 = 280 B |  
-| `Int512H`    |             64 + 28 + 24 + 100 = 216 B |  
-| `Int256H`    |             32 + 28 + 24 + 100 = 184 B |  
-| `Int128H`    |             16 + 28 + 24 + 100 = 168 B |  
-| `Float8192H` | 2 + 1024 + 28 + 24 + 100 + 28 = 1206 B |  
-| `Float4096H` |   2 + 512 + 28 + 24 + 100 + 28 = 694 B |  
-| `Float2048H` |   2 + 256 + 28 + 24 + 100 + 28 = 438 B |  
-| `Float1024H` |   2 + 128 + 28 + 24 + 100 + 28 = 310 B |  
-| `Float512H`  |    2 + 64 + 28 + 24 + 100 + 28 = 246 B |  
-| `Float256H`  |    2 + 32 + 28 + 24 + 100 + 28 = 186 B |  
-| `Float128H`  |    2 + 16 + 28 + 24 + 100 + 28 = 198 B |  
+| Type         |                    Memory usage conjecture |                                                                                                       Equation |  
+|:-------------|-------------------------------------------:|---------------------------------------------------------------------------------------------------------------:|  
+| `UInt8192`   |                   1024 + 40 + 144 = 1208 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
+| `UInt4096`   |                     512 + 40 + 144 = 696 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
+| `UInt2048`   |                     256 + 40 + 144 = 440 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
+| `UInt1024`   |                     128 + 40 + 144 = 312 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
+| `UInt512`    |                      64 + 40 + 144 = 248 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
+| `UInt256`    |                      32 + 40 + 144 = 216 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
+| `UInt128`    |                      16 + 40 + 144 = 200 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
+| `Int8192`    |          8 + 40 + 1016 + 44 + 144 = 1248 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Int4096`    |            8 + 40 + 504 + 44 + 144 = 736 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Int2048`    |            8 + 40 + 248 + 44 + 144 = 480 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Int1024`    |            8 + 40 + 120 + 44 + 144 = 352 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Int512`     |             8 + 40 + 56 + 44 + 144 = 288 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Int256`     |             8 + 40 + 24 + 44 + 144 = 256 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Int128`     |               8 + 40 + 8 + 44 + 40 = 240 B |                                          int raw + int overhead + uint raw + instance overhead + uint overhead |  
+| `Float8192`  | 2 + 40 + 8 + 40 + 1016 + 44 + 144 = 1300 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Float4096`  |   2 + 40 + 8 + 40 + 504 + 44 + 144 = 778 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Float2048`  |   2 + 40 + 8 + 40 + 248 + 44 + 144 = 522 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Float1024`  |   2 + 40 + 8 + 40 + 120 + 44 + 144 = 394 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Float512`   |    2 + 40 + 8 + 40 + 56 + 44 + 144 = 330 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Float256`   |    2 + 40 + 8 + 40 + 24 + 44 + 144 = 298 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Float128`   |      2 + 40 + 8 + 40 + 8 + 44 + 40 = 282 B |       exponent raw + exponent overhead + int raw + int overhead + uint raw + instance overhead + uint overhead |  
+| `UInt8192H`  |                   1024 + 24 + 100 = 1148 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
+| `UInt4096H`  |                     512 + 24 + 100 = 636 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
+| `UInt2048H`  |                     256 + 24 + 100 = 380 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
+| `UInt1024H`  |                     128 + 24 + 100 = 252 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
+| `UInt512H`   |                      64 + 24 + 100 = 188 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
+| `UInt256H`   |                      32 + 24 + 100 = 156 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
+| `UInt128H`   |                      16 + 24 + 100 = 140 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
+| `Int8192H`   |          4 + 28 + 1020 + 28 + 100 = 1180 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Int4096H`   |            4 + 28 + 508 + 28 + 100 = 668 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Int2048H`   |            4 + 28 + 252 + 28 + 100 = 412 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Int1024H`   |            4 + 28 + 124 + 28 + 100 = 284 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Int512H`    |             4 + 28 + 60 + 28 + 100 = 220 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Int256H`    |             4 + 28 + 28 + 28 + 100 = 188 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Int128H`    |              4 + 28 + 12 + 28 + 28 = 172 B |                                          int raw + int overhead + uint raw + instance overhead + uint overhead |  
+| `Float8192H` | 2 + 24 + 4 + 24 + 1020 + 28 + 100 = 1208 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Float4096H` |   2 + 24 + 4 + 24 + 508 + 28 + 100 = 696 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Float2048H` |   2 + 24 + 4 + 24 + 252 + 28 + 100 = 440 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Float1024H` |   2 + 24 + 4 + 24 + 124 + 28 + 100 = 312 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Float512H`  |    2 + 24 + 4 + 24 + 60 + 28 + 100 = 248 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Float256H`  |    2 + 24 + 4 + 24 + 28 + 28 + 100 = 216 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
+| `Float128H`  |     2 + 24 + 4 + 24 + 12 + 28 + 28 = 200 B |       exponent raw + exponent overhead + int raw + int overhead + uint raw + instance overhead + uint overhead |  
 
-This is summing up overhead for the contained elements, stored data, and overhead for the type itself  
 Note that this is in bytes, and assumes the highest amount if theres a range of possibilities.  
 The realistic memory usage will later be measured with CPython. Until then, these amounts should be assumed.  

@@ -366,8 +366,8 @@ class Float8192:
 
 	def __init__(self, value: int|Types.uintsUnion64|Types.uintsUnion32 = 0, *, precision: int|Types.uintsUnion64|Types.uintsUnion32 = 16):
 		self.mantissa = np.zeros(127, dtype=np.uint64)
-		self.mantissa_signed = np.array(np.uint64(0), dtype=np.uint64)
-		self.exponent = np.int16(precision)
+		self.mantissa_signed = np.int64(0)
+		self.exponent = np.uint16(precision)
 		self._from_float(value)
 
 	def _from_float(self, value: int = 0):
