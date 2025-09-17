@@ -638,6 +638,26 @@ class Convert:
 		#? best guess approximation in case nothing better is found :|
 		return (numerator * p10) // denomINATOR, max_precision #! wont work until dunder methods have been added (floordiv)
 
+# TODO: #79 Rewrite to use np types
+	def b10_uint_to_b05(encoded_digits: Types.uintsUnion32|Types.uintsUnion64 = 0, max_precision: Types.uintsUnion32 = 16) -> tuple[Types.uintsUnion32|Types.uintsUnion64, Types.uintsUnion32]:
+		"""Convert base-10 decimal digits into a binary fixed-point encoded uint where each bit is 0.5^n.\n
+		The number of decimal digits is inferred using __len__"""
+
+		if encoded_digits == 0:
+			return type(encoded_digits)(0), type(encoded_digits)(1)
+		decimal_digit_count = len(encoded_digits)
+		power_10 = 10 ** decimal_digit_count
+		for bits in range(1, int(max_precision) + 1):
+			multiplier = 1 << bits
+			if (int(encoded_digits) * multiplier) % power_10 == 0:
+				b05 = (int(encoded_digits) * multiplier) // power_10
+				return type(encoded_digits)(b05), type(encoded_digits)(bits)
+		#? fallback approximation
+		multiplier = 1 << int(max_precision)
+		b05 = (int(encoded_digits) * multiplier) // power_10
+		return type(encoded_digits)(b05), type(encoded_digits)(max_precision)
+
+
 
 class Types:
 	"""Simpler way to import, refer, check and hint to types"""
