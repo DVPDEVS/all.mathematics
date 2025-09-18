@@ -462,4 +462,4 @@ This is what you should check to see the actual memory usage of the objects you 
 | `Float128H`  |     2 + 24 + 4 + 24 + 12 + 28 + 28 = 200 B |       exponent raw + exponent overhead + int raw + int overhead + uint raw + instance overhead + uint overhead |  
 
 Note that this is in bytes, and assumes the highest amount if theres a range of possibilities.  
-The realistic memory usage will later be measured with CPython. Until then, these amounts should be assumed.  
+The realistic memory usage will later be measured with pympler. Until then, these amounts should be assumed.  
