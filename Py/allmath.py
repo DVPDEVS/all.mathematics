@@ -168,13 +168,7 @@ class UInt8192:
 	def __ipow__(self, other: UInt8192)->UInt8192:
 		return self
 
-# TODO: #74 UINT 
-	def __neg__(self)->UInt8192:
-		return self
-
-# TODO: #73 UINT 
-	def __pos__(self)->UInt8192:
-		return self
+#? pos and neg seem wasted tbh.
 
 # TODO: #72 UINT 
 	def __and__(self)->UInt8192:
@@ -493,13 +487,7 @@ class Float8192:
 	def __ipow__(self, other: Float8192)->Float8192:
 		return self
 
-# TODO: #31 FLOAT
-	def __neg__(self)->Float8192:
-		return self
-
-# TODO: #30 FLOAT
-	def __pos__(self)->Float8192:
-		return self
+#? again no use for pos and neg i suspect
 
 # TODO: #28 FLOAT
 	def __abs__(self)->Float8192:
