@@ -18,9 +18,11 @@ print(repr(y))
 
 print(str(y))
 
-print(int(y._to_int()).bit_length())
+try:
+    print(int(y._to_int()).bit_length())
+finally: pass
 
-print(y.chunks[0]) if type(y) not in Types.floattypes64 else print(y.mantissa[0])
+print(y.chunks[0])
 
-print(y.chunks[-1]) if type(y) not in Types.floattypes64 else print(y.mantissa[-1])
+print(y.chunks[-1])
 
