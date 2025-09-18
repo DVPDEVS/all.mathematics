@@ -21,7 +21,7 @@
 
 from __future__ import annotations # Treat type hints as strings/future types. this gets rid of 60+ errors per class
 import numpy as np
-from typing import Union
+from typing import Union, Literal
 
 # Custom type for storing 1024 byte unsigned integers
 class UInt8192:
@@ -278,11 +278,14 @@ class UInt8192:
 		return np.uint8(1024)
 
 # TODO: #52 UINT 
-	def __getitem__(self, indexer = 
-			slice[np.uint32|None,np.uint32|None,np.uint32|None] |
-			tuple[Ellipsis|np.uint32, Ellipsis|np.uint32, Ellipsis|np.uint32] |
-			tuple[Ellipsis|np.uint32, Ellipsis|np.uint32] | 
-			Ellipsis|np.uint32
+	def __getitem__(self, indexer: 
+			# slice[np.uint32|None,np.uint32|None,np.uint32|None] |
+			# tuple[Ellipsis|np.uint32, Ellipsis|np.uint32, Ellipsis|np.uint32] |
+			# tuple[Ellipsis|np.uint32, Ellipsis|np.uint32] | 
+			slice |
+			tuple | 
+			Literal[Ellipsis] |
+			np.uint32
 			)-> Types.allUIntsUnion:
 		if type(indexer) == np.uint32:
 			index = indexer
