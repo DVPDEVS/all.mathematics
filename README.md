@@ -431,14 +431,14 @@ This is what you should check to see the actual memory usage of the objects you 
 | `Int1024`    |            8 + 40 + 120 + 44 + 144 = 352 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
 | `Int512`     |             8 + 40 + 56 + 44 + 144 = 288 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
 | `Int256`     |             8 + 40 + 24 + 44 + 144 = 256 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
-| `Int128`     |               8 + 40 + 8 + 44 + 40 = 240 B |                                          int raw + int overhead + uint raw + instance overhead + uint overhead |  
+| `Int128`     |               8 + 40 + 8 + 44 + 40 = 140 B |                                          int raw + int overhead + uint raw + instance overhead + uint overhead |  
 | `Float8192`  | 2 + 40 + 8 + 40 + 1016 + 44 + 144 = 1300 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
 | `Float4096`  |   2 + 40 + 8 + 40 + 504 + 44 + 144 = 778 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
 | `Float2048`  |   2 + 40 + 8 + 40 + 248 + 44 + 144 = 522 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
 | `Float1024`  |   2 + 40 + 8 + 40 + 120 + 44 + 144 = 394 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
 | `Float512`   |    2 + 40 + 8 + 40 + 56 + 44 + 144 = 330 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
 | `Float256`   |    2 + 40 + 8 + 40 + 24 + 44 + 144 = 298 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
-| `Float128`   |      2 + 40 + 8 + 40 + 8 + 44 + 40 = 282 B |       exponent raw + exponent overhead + int raw + int overhead + uint raw + instance overhead + uint overhead |  
+| `Float128`   |      2 + 40 + 8 + 40 + 8 + 44 + 40 = 182 B |       exponent raw + exponent overhead + int raw + int overhead + uint raw + instance overhead + uint overhead |  
 | `UInt8192H`  |                   1024 + 24 + 100 = 1148 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
 | `UInt4096H`  |                     512 + 24 + 100 = 636 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
 | `UInt2048H`  |                     256 + 24 + 100 = 380 B |                                                             ndarray raw + instance overhead + ndarray overhead |  
@@ -452,14 +452,14 @@ This is what you should check to see the actual memory usage of the objects you 
 | `Int1024H`   |            4 + 28 + 124 + 28 + 100 = 284 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
 | `Int512H`    |             4 + 28 + 60 + 28 + 100 = 220 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
 | `Int256H`    |             4 + 28 + 28 + 28 + 100 = 188 B |                                    int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
-| `Int128H`    |              4 + 28 + 12 + 28 + 28 = 172 B |                                          int raw + int overhead + uint raw + instance overhead + uint overhead |  
+| `Int128H`    |              4 + 28 + 12 + 28 + 28 = 100 B |                                          int raw + int overhead + uint raw + instance overhead + uint overhead |  
 | `Float8192H` | 2 + 24 + 4 + 24 + 1020 + 28 + 100 = 1208 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
 | `Float4096H` |   2 + 24 + 4 + 24 + 508 + 28 + 100 = 696 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
 | `Float2048H` |   2 + 24 + 4 + 24 + 252 + 28 + 100 = 440 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
 | `Float1024H` |   2 + 24 + 4 + 24 + 124 + 28 + 100 = 312 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
 | `Float512H`  |    2 + 24 + 4 + 24 + 60 + 28 + 100 = 248 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
 | `Float256H`  |    2 + 24 + 4 + 24 + 28 + 28 + 100 = 216 B | exponent raw + exponent overhead + int raw + int overhead + ndarray raw + instance overhead + ndarray overhead |  
-| `Float128H`  |     2 + 24 + 4 + 24 + 12 + 28 + 28 = 200 B |       exponent raw + exponent overhead + int raw + int overhead + uint raw + instance overhead + uint overhead |  
+| `Float128H`  |     2 + 24 + 4 + 24 + 12 + 28 + 28 = 122 B |       exponent raw + exponent overhead + int raw + int overhead + uint raw + instance overhead + uint overhead |  
 
 Note that this is in bytes, and assumes the highest amount if theres a range of possibilities.  
 The realistic memory usage will later be measured with pympler. Until then, these amounts should be assumed.  

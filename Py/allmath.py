@@ -63,6 +63,12 @@ class UInt8192:
 	def __repr__(self):
 		return f"UInt8192({self._to_int()})"
 
+	def bit_length(self):
+		return np.uint16(8192)
+
+	def __len__(self)->np.uint8:
+		return np.uint8(1024)
+
 	def __add__(self, other: UInt8192)->UInt8192:
 		res = UInt8192()
 		carry = 0
@@ -116,7 +122,7 @@ class UInt8192:
 
 # TODO: #78 UINT
 	def __truediv__(self, other: UInt8192)->UInt8192: #I am unsure how this will be done with the current methods of doing arithmetic - Smol
-		return self									# Whenever ive finished floats, we can use them. although itruediv may have to cast into  float - DVP
+		return self									# Whenever ive finished floats, we can use them. although itruediv may have to cast into float - DVP
 
 # TODO: #77 UINT 
 	def __itruediv__(self, other: UInt8192)->UInt8192:
@@ -271,9 +277,6 @@ class UInt8192:
 	def __bytes__(self)->bytes:
 		return self._to_int().to_bytes(128, 'little')
 
-	def __len__(self)->np.uint8:
-		return np.uint8(1024)
-
 # TODO: #52 UINT 
 	def __getitem__(self, indexer: 
 			slice[np.uint32|None,np.uint32|None,np.uint32|None] |
@@ -390,16 +393,31 @@ class UInt8192:
 		return self
 
 # TODO: #50 UINT 
-	def __contains__(self)->bool:
-		return self
+	def __contains__(self, other: Types.allUIntsUnion|list[np.uint32]|tuple[np.uint32] = None)->bool:
+		if other == None: raise TypeError("No value to check for was given")
+		elif type(other) in (list, tuple):
+			other = Types.UInt8192(0)
+			... #? basically index but the index value is the value were looking for instead of the position we're looking for D:
+			#? Gotta do this to check:
+			if ... == other: return True
+			other <<= ('some value based on other`s index type') 
+		else: # assume we good, index per chunk and comp to `other`
+			other = np.uint64(other)
+			for i in self.chunks:
+				if i == other: return True
+			return False
 
 # TODO: #49 UINT 
 	def __copy__(self)->UInt8192:
-		return self
+		return Types.UInt8192(int(self))
 
-# TODO: #48 UINT 
 	def __sizeof__(self)->int:
-		return self
+		"""Return actual size of the object in memory, or a conjecture of its size in memory"""
+		try:
+			from pympler.asizeof import asizeof
+			return asizeof(self)
+		except Exception|ImportError|ImportWarning:
+			return np.uint8(1208) #? See Memory Management in README.md for more info about this
 
 # Custom type for storing 1024 byte floats
 class Float8192:
