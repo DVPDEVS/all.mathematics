@@ -402,14 +402,14 @@ class UInt8192:
 			if ... == other: return True
 			other <<= ('some value based on other`s index type') 
 		else: # assume we good, index per chunk and comp to `other`
-			other = np.uint64(other)
-			for i in self.chunks:
-				if i == other: return True
+			other = np.uint64(int(other))
+			for i in range(len(self.chunks)):
+				if self.chunks[i] == other: return True   
 			return False
 
 # TODO: #49 UINT 
 	def __copy__(self)->UInt8192:
-		return Types.UInt8192(int(self))
+		return Types.UInt8192(int(self)) #! https://docs.python.org/3/library/copy.html
 
 	def __sizeof__(self)->int:
 		"""Return actual size of the object in memory, or a conjecture of its size in memory"""
