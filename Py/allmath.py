@@ -27,6 +27,8 @@ from typing import Union, Literal
 class UInt8192:
 	"""This is a fixed-size unsigned 8192-bit integer type. It IMMEDIATELY takes 1KB of ram."""
 
+#TODO: Change type hints to be realistc/useful
+
 	MAX = (1 << 1024) -1
 
 	__slots__ = ['chunks']
@@ -176,44 +178,53 @@ class UInt8192:
 
 #? pos and neg seem wasted tbh.
 
-# TODO: #72 UINT 
-	def __and__(self)->UInt8192:
-		return self
+	def __and__(self, other: UInt8192)->UInt8192:
+		new = UInt8192(0)
+		for i in range(len(self.chunks)): #! Very temp!!
+			new.chunks[i] = self.chunks[i] & other.chunks[i] # basic logic im gonna need
+		return new
 
-# TODO: #71 UINT 
-	def __or__(self)->UInt8192:
-		return self
+	def __or__(self, other: UInt8192)->UInt8192:
+		new = UInt8192(0)
+		for i in range(len(self.chunks)): #! Very temp!!
+			new.chunks[i] = self.chunks[i] | other.chunks[i] # basic logic im gonna need
+		return new
 
-# TODO: #70 UINT 
-	def __xor__(self)->UInt8192:
-		return self
+	def __xor__(self, other: UInt8192)->UInt8192:
+		new = UInt8192(0)
+		for i in range(len(self.chunks)): #! Very temp!!
+			new.chunks[i] = self.chunks[i] ^ other.chunks[i] # basic logic im gonna need
+		return new
 
 # TODO: #69 UINT 
-	def __lshift__(self)->UInt8192:
+	def __lshift__(self, amount: UInt8192)->UInt8192:
 		return self
 
 # TODO: #68 UINT 
-	def __rshift__(self)->UInt8192:
+	def __rshift__(self, amount: UInt8192)->UInt8192:
 		return self
 
-# TODO: #67 UINT 
-	def __iand__(self)->UInt8192:
+	def __iand__(self, other: UInt8192)->UInt8192:
+		for i in range(len(self.chunks)): #! Very temp!!
+			self.chunks[i] = self.chunks[i] & other.chunks[i] # basic logic im gonna need
 		return self
 
-# TODO: #66 UINT 
-	def __ior__(self)->UInt8192:
+	def __ior__(self, other: UInt8192)->UInt8192:
+		for i in range(len(self.chunks)): #! Very temp!!
+			self.chunks[i] = self.chunks[i] | other.chunks[i] # basic logic im gonna need
 		return self
 
-# TODO: #65 UINT 
-	def __ixor__(self)->UInt8192:
+	def __ixor__(self, other: UInt8192)->UInt8192:
+		for i in range(len(self.chunks)): #! Very temp!!
+			self.chunks[i] = self.chunks[i] ^ other.chunks[i] # basic logic im gonna need
 		return self
 
 # TODO: #64 UINT 
-	def __ilshift__(self)->UInt8192:
+	def __ilshift__(self, amount: UInt8192)->UInt8192:
 		return self
 
 # TODO: #63 UINT 
-	def __irshift__(self)->UInt8192:
+	def __irshift__(self, amount: UInt8192)->UInt8192:
 		return self
 
 	def __eq__(self, other: UInt8192)->bool:
