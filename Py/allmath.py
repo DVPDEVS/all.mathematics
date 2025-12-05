@@ -198,11 +198,28 @@ class UInt8192:
 
 # TODO: #69 UINT 
 	def __lshift__(self, amount: UInt8192)->UInt8192:
-		return self
+		new = UInt8192(0); held = np.uint64
+		bias = int(amount) % 64
+		full_cycles = (int(amount) - bias) // 64
+		zero_count = np.uint32(0)
+		for a in range(len(self.chunks)):
+			if self.chunks[a] == 0: zero_count += 1
+			else: break
+		for i in range(full_cycles):
+
+
+		for i in range(len(self.chunks)): #? stupid fuck needs to be shifted bitwise in a loop over len()?!
+			for j in range(min(64, int(amount))):
+				holder.chunks[i][0] = self.chunks[i][j]
+				holder.chunks[i] << 1
+				amount = max(int(amount), int(amount) - 64 if int(amount) >= 64 else 0)
+			
+		return new
 
 # TODO: #68 UINT 
 	def __rshift__(self, amount: UInt8192)->UInt8192:
-		return self
+		new = UInt8192(0); holder = UInt8192(0)
+		return new
 
 	def __iand__(self, other: UInt8192)->UInt8192:
 		for i in range(len(self.chunks)): #! Very temp!!
