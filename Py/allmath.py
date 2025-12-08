@@ -27,7 +27,7 @@ from typing import Union, Literal
 class UInt8192:
 	"""This is a fixed-size unsigned 8192-bit integer type. It IMMEDIATELY takes 1KB of ram."""
 
-#TODO: Change type hints to be realistc/useful
+#TODO: #83 Change type hints to be realistc/useful
 
 	MAX = (1 << 1024) -1
 
@@ -123,11 +123,11 @@ class UInt8192:
 		return self
 
 # TODO: #78 UINT
-	def __truediv__(self, other: UInt8192)->UInt8192: #I am unsure how this will be done with the current methods of doing arithmetic - Smol
+	def __truediv__(self, other: UInt8192)->Float8192: #I am unsure how this will be done with the current methods of doing arithmetic - Smol
 		return self									# Whenever ive finished floats, we can use them. although itruediv may have to cast into float - DVP
 
 # TODO: #77 UINT 
-	def __itruediv__(self, other: UInt8192)->UInt8192:
+	def __itruediv__(self, other: UInt8192)->Float8192:
 		return self
 
 	def __floordiv__(self, other: UInt8192)->UInt8192:
@@ -330,9 +330,9 @@ class UInt8192:
 # TODO: #52 UINT 
 	def __getitem__(self, indexer: 
 			slice[np.uint32|None,np.uint32|None,np.uint32|None] |
-			tuple[Literal[Ellipsis]|np.uint32, Literal[Ellipsis]|np.uint32, Literal[Ellipsis]|np.uint32] |
-			tuple[Literal[Ellipsis]|np.uint32, Literal[Ellipsis]|np.uint32] | 
-			Literal[Ellipsis] |
+			tuple[Literal[Ellipsis]|np.uint32, Literal[Ellipsis]|np.uint32, Literal[Ellipsis]|np.uint32] | #type: ignore
+			tuple[Literal[Ellipsis]|np.uint32, Literal[Ellipsis]|np.uint32] | #type: ignore
+			Literal[Ellipsis] | #type: ignore
 			np.uint32
 			)-> Types.allUIntsUnion:
 		if type(indexer) == np.uint32:
