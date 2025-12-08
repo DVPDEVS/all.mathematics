@@ -199,27 +199,49 @@ class UInt8192:
 # TODO: #69 UINT 
 	def __lshift__(self, amount: UInt8192)->UInt8192:
 		new = UInt8192(0); held = np.uint64
-		bias = int(amount) % 64
-		full_cycles = (int(amount) - bias) // 64
-		zero_count = np.uint32(0)
-		for a in range(len(self.chunks)):
-			if self.chunks[a] == 0: zero_count += 1
-			else: break
-		for i in range(full_cycles):
+		# whole_words = amount // 64
+		# bit_shift   = amount % 64
+		# # Step 1: shift whole words
+		# if whole_words > 0:
+		# 	new = np.concatenate([np.zeros(whole_words, dtype=np.uint64), new])
+		# # Step 2: shift bits inside each word + propagate carries
+		# if bit_shift > 0:
+		# 	shifted = new << bit_shift
+		# 	carries = new >> (64 - bit_shift)
+		# 	# add carries into next word
+		# 	shifted[1:] |= carries[:-1]
+		# 	new = shifted
 
+		...
 
-		for i in range(len(self.chunks)): #? stupid fuck needs to be shifted bitwise in a loop over len()?!
-			for j in range(min(64, int(amount))):
-				holder.chunks[i][0] = self.chunks[i][j]
-				holder.chunks[i] << 1
-				amount = max(int(amount), int(amount) - 64 if int(amount) >= 64 else 0)
-			
 		return new
 
 # TODO: #68 UINT 
 	def __rshift__(self, amount: UInt8192)->UInt8192:
-		new = UInt8192(0); holder = UInt8192(0)
+		new = UInt8192(0); held = np.uint64
+		# whole_words = amount // 64
+		# bit_shift   = amount % 64
+		# # Step 1: shift whole words (drop LSB words)
+		# if whole_words > 0:
+		# 	if whole_words >= len(new):
+		# 		return np.zeros_like(new, dtype=np.uint64)
+		# 	new = new[whole_words:]
+		# # Step 2: shift bits inside each word + propagate carries downward
+		# if bit_shift > 0:
+		# 	shifted = new >> bit_shift
+		# 	carries = new << (64 - bit_shift)
+		# 	# carry from word i goes into word i-1
+		# 	shifted[:-1] |= carries[1:]
+		# 	new = shifted
+		# # pad MSB side to maintain fixed length
+		# if whole_words > 0:
+		# 	pad = np.zeros(whole_words, dtype=np.uint64)
+		# 	new = np.concatenate([new, pad])
+
+		...
+
 		return new
+
 
 	def __iand__(self, other: UInt8192)->UInt8192:
 		for i in range(len(self.chunks)): #! Very temp!!
@@ -795,7 +817,7 @@ class Types:
 		signed = np.uint32(signed & 0b1) # bool value
 		littleEndian = np.uint32(littleEndian & 0b1) # bool value
 		chunkselect = np.uint32(chunkselect & 0b1) if chunkselect is not None else None # bool value uwu
-		indexvalue = np.uint32(indexvalue & 0xFF) # can be up to 16 bits
+		indexvalue = np.uint32(indexvalue & 0xFFFF) # can be up to 16 bits
 		index |= np.uint32(version2) << np.uint8(31)
 		index |= (mode << np.uint8(27)) # bit magic sets bits 30-27 to mode
 		#? This is an in-place bitwise or and a bitwise leftshift
