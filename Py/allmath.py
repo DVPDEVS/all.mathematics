@@ -17,7 +17,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 # -----------------------------------------------------------------------------
 
-
+#TODO: #82 Make all bools into np.uint8
 
 from __future__ import annotations # Treat type hints as strings/future types. this gets rid of 60+ errors per class
 import numpy as np
