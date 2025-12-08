@@ -439,8 +439,64 @@ class UInt8192:
 				else: raise ValueError(check[0])
 
 # TODO: #51 UINT 
-	def __setitem__(self)->UInt8192:
-		return self
+	def __setitem__(self, indexer: 
+			slice[np.uint32|None,np.uint32|None,np.uint32|None] |
+			tuple[Literal[Ellipsis]|np.uint32, Literal[Ellipsis]|np.uint32, Literal[Ellipsis]|np.uint32] | #type: ignore
+			tuple[Literal[Ellipsis]|np.uint32, Literal[Ellipsis]|np.uint32] | #type: ignore
+			Literal[Ellipsis] | #type: ignore
+			np.uint32,
+			value: Types.allUIntsUnion
+			)-> Types.allUIntsUnion:
+		if type(indexer) == np.uint32:
+			index = indexer
+			check = Types.index_validate(index)
+			if check[0] == np.uint8(1):
+				version, modeval, sign, chunkselect, endianness, indexvalue = Types.index_decode(index)
+				version		 = np.uint8(version)
+				modeval		 = np.uint8(modeval)
+				sign		 = np.uint8(sign)
+				chunkselect  = np.uint8(chunkselect)
+				endianness	 = np.uint8(endianness)
+				indexvalue	 = np.uint16(indexvalue)
+				if version == 0: #! this is okay because numpy operations are very quick :3c
+					if modeval == np.uint8(0)  and indexvalue >= np.uint16(8192): # just in case you dont rember the mode chart
+						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when bit indexing")
+					if modeval == np.uint8(1)  and indexvalue >= np.uint16(2048):
+						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when nybble indexing")
+					if modeval == np.uint8(2)  and indexvalue >= np.uint16(1024):
+						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when byte indexing")
+					if modeval == np.uint8(3)  and indexvalue >= np.uint16(512):
+						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when Word indexing")
+					if modeval == np.uint8(4)  and indexvalue >= np.uint16(256):
+						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when DWord indexing")
+					if modeval == np.uint8(5)  and indexvalue >= np.uint16(128):
+						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when QWord indexing")
+					if modeval == np.uint8(6)  and indexvalue >= np.uint16(64):
+						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt128 indexing")
+					if modeval == np.uint8(7)  and indexvalue >= np.uint16(32):
+						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt256 indexing")
+					if modeval == np.uint8(8)  and indexvalue >= np.uint16(16):
+						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt512 indexing")
+					if modeval == np.uint8(9)  and indexvalue >= np.uint16(8):
+						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt1024 indexing")
+					if modeval == np.uint8(10) and indexvalue >= np.uint16(4):
+						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt2048 indexing")
+					if modeval == np.uint8(11) and indexvalue >= np.uint16(2):
+						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt4096 indexing")
+					# else: raise ValueError(f"Value not supported for version 1 indexing of {type(self)}")
+					try:
+						# generate masks
+						_len = np.uint64(0)
+						for _ in range(modeval):
+							_len |= 1; _len << 1
+						vmask = np.uint64(indexvalue)
+
+						...
+					except IndexError: raise IndexError("Index value is out of bounds for index type")
+				else: raise NotImplementedError("Version 2 has not been implemented for this version yet.")
+			else: 
+				if check[1] is not None: raise check[1]
+				else: raise ValueError(check[0])
 
 # TODO: #50 UINT 
 	def __contains__(self, other: Types.allUIntsUnion|list[np.uint32]|tuple[np.uint32] = None)->bool:
