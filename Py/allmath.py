@@ -477,7 +477,7 @@ class UInt8192:
 			index = indexer
 			check = Types.index_validate(index)
 			if check[0] == np.uint8(1):
-				m = Types.index_match(index)
+				m : tuple[np.uint8, None|IndexError] = Types.index_match(index, "UInt8192")
 				if m[0] == np.uint8(1):
 					version, modeval, sign, chunkselect, endianness, indexvalue = Types.index_decode(index)
 					version		= np.uint8(version)
@@ -492,10 +492,9 @@ class UInt8192:
 						for _ in range(modeval):
 							_len |= 1; _len << 1
 						vmask = np.uint64(indexvalue)
-
 						...
 					except IndexError as e: raise IndexError("Unknown failure when indexing") from e 
-				except IndexError as e: raise IndexError("Index value is out of bounds for index type") from e
+				else: raise m[1]
 			else: 
 				if check[1] is not None: raise check[1]
 				else: raise ValueError(check[0])
@@ -861,14 +860,14 @@ class Types:
 		if indexvalue != indexvaluemasked:
 			return np.uint8(0), ValueError("Index is out of range for index type")
 		return np.uint8(1), None
-	
+
 	def index_match(index: np.uint32, type: str)->tuple[np.uint8, None|IndexError]:
 		version, modeval, _a, _b, _c, indexvalue = Types.index_decode(index)
 		version		= np.uint8(version)
 		modeval		= np.uint8(modeval)
 		indexvalue	= np.uint16(indexvalue)
 		if version == 0:
-			lookup_values = Types.index_lookup_helper("UInt8192", modeval)
+			lookup_values = Types.index_lookup_helper(type, modeval)
 			if indexvalue >= lookup_values.indexvalue_max: # just in case you dont rember the mode chart
 				return np.uin8(0), IndexError(f"Index {indexvalue} is out of range for type {type} when {lookup_values.name.capitalize()} indexing")
 		return np.uint8(1), None
