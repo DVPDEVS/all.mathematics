@@ -477,18 +477,15 @@ class UInt8192:
 			index = indexer
 			check = Types.index_validate(index)
 			if check[0] == np.uint8(1):
-				version, modeval, sign, chunkselect, endianness, indexvalue = Types.index_decode(index)
-				version		= np.uint8(version)
-				modeval		= np.uint8(modeval)
-				sign		= np.uint8(sign)
-				chunkselect = np.uint8(chunkselect)
-				endianness	= np.uint8(endianness)
-				indexvalue	= np.uint16(indexvalue)
-				if version == 0: #! this is okay because numpy operations are very quick :3c
-					lookup_values = Types.index_lookup_helper("UInt8192", modeval)
-					if indexvalue >= lookup_values.indexvalue_max: # just in case you dont rember the mode chart
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when {lookup_values.name.capitalize()} indexing")
-					# else: raise ValueError(f"Value not supported for version 1 indexing of {type(self)}")
+				m = Types.index_match(index)
+				if m[0] == np.uint8(1):
+					version, modeval, sign, chunkselect, endianness, indexvalue = Types.index_decode(index)
+					version		= np.uint8(version)
+					modeval		= np.uint8(modeval)
+					sign		= np.uint8(sign)
+					chunkselect = np.uint8(chunkselect)
+					endianness	= np.uint8(endianness)
+					indexvalue	= np.uint16(indexvalue)
 					try:
 						# generate masks
 						_len = np.uint64(0)
@@ -497,8 +494,8 @@ class UInt8192:
 						vmask = np.uint64(indexvalue)
 
 						...
-					except IndexError: raise IndexError("Index value is out of bounds for index type")
-				else: raise NotImplementedError("Version 2 has not been implemented for this version yet.")
+					except IndexError as e: raise IndexError("Unknown failure when indexing") from e 
+				except IndexError as e: raise IndexError("Index value is out of bounds for index type") from e
 			else: 
 				if check[1] is not None: raise check[1]
 				else: raise ValueError(check[0])
@@ -864,6 +861,17 @@ class Types:
 		if indexvalue != indexvaluemasked:
 			return np.uint8(0), ValueError("Index is out of range for index type")
 		return np.uint8(1), None
+	
+	def index_match(index: np.uint32, type: str)->tuple[np.uint8, None|IndexError]:
+		version, modeval, _a, _b, _c, indexvalue = Types.index_decode(index)
+		version		= np.uint8(version)
+		modeval		= np.uint8(modeval)
+		indexvalue	= np.uint16(indexvalue)
+		if version == 0:
+			lookup_values = Types.index_lookup_helper("UInt8192", modeval)
+			if indexvalue >= lookup_values.indexvalue_max: # just in case you dont rember the mode chart
+				return np.uin8(0), IndexError(f"Index {indexvalue} is out of range for type {type} when {lookup_values.name.capitalize()} indexing")
+		return np.uint8(1), None
 
 	def index_encode(mode: Types.uintsUnion32 = np.uint8(2), indexvalue: Types.uintsUnion32 = np.uint32(0), *,
 			#! btw best for memory reasons to use the smalles uints you can, so here i'd pass np.uint8 for mode
@@ -1006,21 +1014,15 @@ class Types:
 
 	#? Lookup table for index type, mode value, and expected indexvalue max size
 	index_lookup_table: dict[str, dict[str, list[type[_INDEX_LOOKUP_SET]]]] = {"v1":{},}
+
 	# populate the table! (i cant even read this ffs)
 	# TODO: #84 Verify this bullshit works
 	name_fields = fields(_INDEX_LOOKUP_NAMES)
 	bitcount_fields = fields(_INDEX_LOOKUP_BITCOUNTS)
 	# Build canonical progression of bit sizes (largest → smallest)
-	bit_progression = sorted(
-		(getattr(Types._INDEX_LOOKUP_BITCOUNTS, f.name) for f in bitcount_fields),
-		reverse=True
-	)
+	bit_progression = sorted((getattr(Types._INDEX_LOOKUP_BITCOUNTS, f.name) for f in bitcount_fields), reverse=True)
 	# Precompute bit-size → symbolic name mapping
-	bits_to_name = {
-		getattr(Types._INDEX_LOOKUP_BITCOUNTS, f.name):
-		getattr(Types._INDEX_LOOKUP_NAMES, f.name)
-		for f in name_fields
-	}
+	bits_to_name = {getattr(Types._INDEX_LOOKUP_BITCOUNTS, f.name): getattr(Types._INDEX_LOOKUP_NAMES, f.name) for f in name_fields}
 	# Versioned lookup table root
 	index_lookup_table = {"v1": {}}
 	# OUTER LOOP:
@@ -1054,7 +1056,7 @@ class Types:
 	@staticmethod
 	def index_lookup_helper(
 			type: str,
-			index: Types.allIntUIntsUnion|str = np.uin8(0),
+			index: Types.allIntUIntsUnion|str = np.uint8(0),
 			version: str = "v1"
 			) -> type[_INDEX_LOOKUP_SET]|ValueError:
 		try:
