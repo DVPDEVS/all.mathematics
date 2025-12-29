@@ -1010,20 +1010,44 @@ class Types:
 	# TODO: #84 Verify this bullshit works
 	name_fields = fields(_INDEX_LOOKUP_NAMES)
 	bitcount_fields = fields(_INDEX_LOOKUP_BITCOUNTS)
-	for total_field in name_fields:
+	# Build canonical progression of bit sizes (largest → smallest)
+	bit_progression = sorted(
+		(getattr(Types._INDEX_LOOKUP_BITCOUNTS, f.name) for f in bitcount_fields),
+		reverse=True
+	)
+	# Precompute bit-size → symbolic name mapping
+	bits_to_name = {
+		getattr(Types._INDEX_LOOKUP_BITCOUNTS, f.name):
+		getattr(Types._INDEX_LOOKUP_NAMES, f.name)
+		for f in name_fields
+	}
+	# Versioned lookup table root
+	index_lookup_table = {"v1": {}}
+	# OUTER LOOP:
+	# For each total container size, generate all valid sub-indexing modes.
+	# Iteration is largest → smallest to preserve dominance ordering.
+	for total_field in reversed(name_fields):
 		total_bits = getattr(_INDEX_LOOKUP_BITCOUNTS, total_field.name)
 		total_name = getattr(_INDEX_LOOKUP_NAMES, total_field.name)
-		sub_modes = [] ; mode_idx = 0
-		for sub_field in name_fields:
-			sub_bits = getattr(_INDEX_LOOKUP_BITCOUNTS, sub_field.name)
-			if sub_bits <= total_bits:
-				max_index = total_bits // sub_bits
-				sub_modes.append(_INDEX_LOOKUP_SET(
-					name=getattr(_INDEX_LOOKUP_NAMES, sub_field.name),
-					modeval=np.uint8(mode_idx),
-					indexvalue_max=np.uint16(max_index)
-				))
-				mode_idx += 1
+		sub_modes: list[_INDEX_LOOKUP_SET] = []
+		modeval = 0
+		# INNER LOOP:
+		# Walk descending bit sizes and admit only strictly smaller index modes.
+		for sub_bits in bit_progression:
+			# Reject self and impossible (larger) sub-index types
+			if sub_bits >= total_bits:
+				continue
+			# Maximum valid index value for this sub-mode
+			max_index = total_bits // sub_bits
+			sub_modes.append(
+				_INDEX_LOOKUP_SET(
+					name=bits_to_name[sub_bits],
+					modeval=np.uint8(modeval),
+					indexvalue_max=np.uint16(max_index),
+				)
+			)
+			modeval += 1
+		# Register computed modes under this total container type
 		index_lookup_table["v1"][total_name] = sub_modes
 
 	# and helper function bc this isnt hilariously easy to parse without being fwb with the structure
