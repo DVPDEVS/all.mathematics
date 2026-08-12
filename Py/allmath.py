@@ -451,16 +451,33 @@ class UInt8192:
 				if check[1] is not None: raise check[1]
 				else: raise ValueError(check[0])
 		elif type(indexer) == slice:
-			start = indexer[0]
-			end = indexer[1]
-			step = indexer[2] if len(indexer)==3 else np.uint8(0)
-			# Check if start is a valid encoded index value
-			check = Types.index_validate(start)
-			if check[0] == np.uint8(1):
-				version, modeval, _1, _2, _3, _4 = Types.index_decode(index)
-				version		 = np.uint8(version) # we care about these two only
-				modeval		 = np.uint8(modeval) # bc this is how many bits to grab per step
-				... # branch off to define settings
+			# validate the input and assign to usable vars
+			start, end, step = np.uint32(0), np.uint32(len(self)), np.uint32(1)
+			type_s, type_e, type_p = type(indexer[0]), type(indexer[1]), type(indexer[2])
+			if type_s == None & type_e == None & type_p == None: raise ValueError(f"Invalid slice object!\n> [{indexer}]\n")
+			if type_s != None: start = indexer[0]
+			if type_e != None: end = indexer[1]
+			if type_p != None: step = indexer[2]
+			# Check for valid encoded index values
+			if type_s != None:
+				check = Types.index_validate(start)
+				if not check[0] == np.uint8(1): raise check[1]
+			elif type_e != None:
+				check = Types.index_validate(end)
+				if not check[0] == np.uint8(1): raise check[1]
+			elif type_p != None:
+				check = Types.index_validate(step)
+				if not check[0] == np.uint8(1): raise check[1]
+			else: # use default index settings
+				check = Types.index_encode()
+			version, modeval, sign, chunkselect, endianness, indexvalue = Types.index_decode(check)
+			version		 = np.uint8(version)
+			modeval		 = np.uint8(modeval)
+			sign		 = np.uint8(sign)
+			chunkselect  = np.uint8(chunkselect)
+			endianness	 = np.uint8(endianness)
+			indexvalue	 = np.uint16(indexvalue)
+			
 			# Next, use settings to make a new copy containing only the sliced elements
 
 
@@ -847,8 +864,11 @@ class Types:
 		return (version, modeval, sign, chunkselect, endianness, indexvalue)
 
 	def index_validate(index: np.uint32)->tuple[np.uint8, NotImplementedError|ValueError|None]:
+		"""
+		Returns a validation signal uint8 and what, if anything, was wrong.
+		"""
 		#? avoid returning bools or ints for memory savings. see readme for more info
-		if index & 0x80000000 != np.uint32(0): #? check for version. current only applicable is 1, or 0b0...
+		if index & 0x80000000 != np.uint32(0): #? check for version. current only applicable is v1, or 0b0...
 			return np.uint8(0), NotImplementedError("Version 2 has not been implemented")
 		mode = (index & np.uint32(0x78000000)) >> np.uint8(27)
 		mask = np.uint32(0)

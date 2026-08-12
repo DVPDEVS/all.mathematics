@@ -208,6 +208,9 @@ My estimate for the largest value storable in v2 is a UInt2097152, or roughly 25
   | `obj[ ..., ..., ... ]`                     | Ellipses | `obj.__getitem__(( Ellipses, Ellipses, Ellipses ))` | `min -> max`                  |  
   | `obj[ ..., ... ]`                          | Ellipses | `obj.__getitem__(( Ellipses, Ellipses ))`           | `min -> max`                  |  
 
+  The first valid `np.uint32` value is assumed to be of an index kind and thus holding the indexing settings.  
+  If none are provided, assumes standard byte indexing.  
+
   - Helper function  
 
     Theres a helper function, `Types.index_encode()` which i heavily suggest using.  
