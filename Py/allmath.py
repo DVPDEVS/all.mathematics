@@ -455,19 +455,19 @@ class UInt8192:
 			start, end, step = np.uint32(0), np.uint32(len(self)), np.uint32(1)
 			type_s, type_e, type_p = type(indexer[0]), type(indexer[1]), type(indexer[2])
 			if type_s == None & type_e == None & type_p == None: raise ValueError(f"Invalid slice object!\n> [{indexer}]\n")
-			if type_s != None: start = indexer[0]
-			if type_e != None: end = indexer[1]
-			if type_p != None: step = indexer[2]
 			# Check for valid encoded index values
 			if type_s != None:
+				start = indexer[0]
 				check = Types.index_validate(start)
-				if not check[0] == np.uint8(1): raise check[1]
+				if not check[0] == 1: raise check[1]
 			elif type_e != None:
+				end = indexer[1]
 				check = Types.index_validate(end)
-				if not check[0] == np.uint8(1): raise check[1]
+				if not check[0] == 1: raise check[1]
 			elif type_p != None:
+				step = indexer[2]
 				check = Types.index_validate(step)
-				if not check[0] == np.uint8(1): raise check[1]
+				if not check[0] == 1: raise check[1]
 			else: # use default index settings
 				check = Types.index_encode()
 			version, modeval, sign, chunkselect, endianness, indexvalue = Types.index_decode(check)
@@ -477,7 +477,7 @@ class UInt8192:
 			chunkselect  = np.uint8(chunkselect)
 			endianness	 = np.uint8(endianness)
 			indexvalue	 = np.uint16(indexvalue)
-			
+			# reassign indexvalue to whichever conributed it
 			# Next, use settings to make a new copy containing only the sliced elements
 
 
