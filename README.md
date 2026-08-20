@@ -115,7 +115,8 @@ My estimate for the largest value storable in v2 is a UInt2097152, or roughly 25
   - Initial value: 0
   - Chunks of np.uint64, np.int32 etc.
 - Indexing 
-  - Index
+  - Single index
+    - `obj[ np.uint32 ]` / `obj.__getitem__( np.uint32 )` 
     - Uses a 32 bit value of any type, simplest defined in hex or bin
     - Table of structure, as default Little Endian (LE) 
       - Indexes depend on a declaration in Mode Denotion to define which one is applicable.
@@ -165,38 +166,33 @@ My estimate for the largest value storable in v2 is a UInt2097152, or roughly 25
       | 0b01010              | 10               | UInt2048 | 5  ... 0                      |
       | 0b01011              | 11               | UInt4096 | 4  ... 0                      |
       | 0b01100...0b01111    | 12-15            | Reserved | 0                             |
-  
-  - The returned values from indexing/slicing will be the corresponding value, such as a big uint type, a np.uint8 for small values, etc.
-    - This is purely a memory savings optimization. See the chart below for my reason to do this. I also have a chart further down at [Memory management](#memory-management) which covers memory management in more detail.  
 
-    | Type      | Size in RAM      |
-    |-----------|------------------|
-    | int       | ~28-36 bytes +   |
-    | bool      | int subclass     |
-    | np.uint8  | 1 byte           |
-    | np.uint16 | 2 bytes          |
-    | np.uint32 | 4 bytes          |
-    | np.uint64 | 8 bytes          |
-    | np.uint   | 4-8 bytes (auto) |
-    | np.uintc  | 4 bytes          |
+    - The returned values from indexing/slicing will be the corresponding value, such as a big uint type, a np.uint8 for small values, etc.
+      - This is purely a memory savings optimization. See the chart below for my reason to do this. I also have a chart further down at [Memory management](#memory-management) which covers memory management in more detail.  
+
+      | Type      | Size in RAM      |
+      |-----------|------------------|
+      | int       | ~28-36 bytes +   |
+      | bool      | int subclass     |
+      | np.uint8  | 1 byte           |
+      | np.uint16 | 2 bytes          |
+      | np.uint32 | 4 bytes          |
+      | np.uint64 | 8 bytes          |
+      | np.uint   | 4-8 bytes (auto) |
+      | np.uintc  | 4 bytes          |
 
   - Slice and Ellipses  
-    The custom types are designed to support the following kinds of indexing:  
 
-  | Structure                                  | Type     | Function call                                       | Treated as                    |  
-  |:-------------------------------------------|:---------|:----------------------------------------------------|:------------------------------|  
-  | `obj[ np.uint32 ]`                         | Index    | `obj.__getitem__( np.uint32 )`                      | `x`                           |  
-  | `obj[ np.uint32 : ]`                       | Slice    | `obj.__getitem__( slice( uint32, None, None))`      | `x -> max`                    |  
-  | `obj[ : np.uint32 ]`                       | Slice    | `obj.__getitem__( slice( None, uint32, None))`      | `min -> x`                    |  
-  | `obj[ np.uint32 : np.uint32 ]`             | Slice    | `obj.__getitem__( slice( uint32, uint32, None))`    | `x -> y`                      |  
-  | `obj[ np.uint32 : np.uint32 : ]`           | Slice    | `obj.__getitem__( slice( uint32, uint32, None))`    | `x -> y`                      |  
-  | `obj[ np.uint32 : : np.uint32 ]`           | Slice    | `obj.__getitem__( slice( uint32, None, uint32))`    | `x -> max, in steps of z`     |  
-  | `obj[ : np.uint32 : np.uint32 ]`           | Slice    | `obj.__getitem__( slice( None, uint32, uint32))`    | `min -> x, in steps of y`     |  
-  | `obj[ : np.uint32 : ]`                     | Slice    | `obj.__getitem__( slice( None, uint32, None))`      | `min -> x`                    |  
-  | `obj[ np.uint32 : np.uint32 : ]`           | Slice    | `obj.__getitem__( slice( uint32, None, None))`      | `x -> max`                    |  
-  | `obj[ np.uint32 : np.uint32 : np.uint32 ]` | Slice    | `obj.__getitem__( slice( uint32, None, None))`      | `x -> max`                    |  
-  | `obj[ : : ]`                               | Slice    | `obj.__getitem__( slice( None, None, None))`        | `raise ValueError`            |  
-  | `obj[ : ]`                                 | Slice    | `obj.__getitem__( slice( None, None, None))`        | `raise ValueError`            |  
+    - Slices  
+      - `obj[ np.uint32|None : np.uint32|None : np.uint32 ]` / `obj.__getitem__( slice( np.uint32|None, np.uint32|None, np.uint32 ))`  
+      - The last argument has to be a valid single index and its index settings apply to the whole slice  
+        This in addition to its regular job of step size - which should be encoded as its index value.  
+      - Arguments 1 and 2 may be unset (`None`), eg. `obj[::step]`  
+      - Raises `ValueError` if the given arguments are not valid  
+
+    - Ellipses  
+      - `obj[ ...|np.uint32, ...|np.uint32, np.uint32 ]` / ``
+
   | `obj[ ... ]`                               | Ellipses | `obj.__getitem__( Ellipses )`                       | `min -> max`                  |  
   | `obj[ ..., np.uint32 ]`                    | Ellipses | `obj.__getitem__(( Ellipses, uint32 ))`             | `min -> x`                    |  
   | `obj[ np.uint32, ... ]`                    | Ellipses | `obj.__getitem__(( uint32, Ellipses ))`             | `x -> max`                    |  
