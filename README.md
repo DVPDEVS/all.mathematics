@@ -181,31 +181,14 @@ My estimate for the largest value storable in v2 is a UInt2097152, or roughly 25
       | np.uint   | 4-8 bytes (auto) |
       | np.uintc  | 4 bytes          |
 
-  - Slice and Ellipses  
-
-    - Slices  
-      - `obj[ np.uint32|None : np.uint32|None : np.uint32 ]` / `obj.__getitem__( slice( np.uint32|None, np.uint32|None, np.uint32 ))`  
-      - The last argument has to be a valid single index and its index settings apply to the whole slice  
-        This in addition to its regular job of step size - which should be encoded as its index value.  
-      - Arguments 1 and 2 may be unset (`None`), eg. `obj[::step]`  
-      - Raises `ValueError` if the given arguments are not valid  
-
-    - Ellipses  
-      - `obj[ ...|np.uint32, ...|np.uint32, np.uint32 ]` / ``
-
-  | `obj[ ... ]`                               | Ellipses | `obj.__getitem__( Ellipses )`                       | `min -> max`                  |  
-  | `obj[ ..., np.uint32 ]`                    | Ellipses | `obj.__getitem__(( Ellipses, uint32 ))`             | `min -> x`                    |  
-  | `obj[ np.uint32, ... ]`                    | Ellipses | `obj.__getitem__(( uint32, Ellipses ))`             | `x -> max`                    |  
-  | `obj[ np.uint32, ..., np.uint32 ]`         | Ellipses | `obj.__getitem__(( uint32, Ellipses, uint32 ))`     | `x -> y`                      |  
-  | `obj[ ..., np.uint32, ... ]`               | Ellipses | `obj.__getitem__(( Ellipses, uint32, Ellipses ))`   | `min -> max (must include x)` |  
-  | `obj[ ..., np.uint32, np.uint32 ]`         | Ellipses | `obj.__getitem__(( Ellipses, uint32, uint32 ))`     | `min -> y (must include x)`   |  
-  | `obj[ np.uint32, np.uint32, ... ]`         | Ellipses | `obj.__getitem__(( uint32, uint32, Ellipses ))`     | `x -> y`                      |  
-  | `obj[ np.uint32, ..., ... ]`               | Ellipses | `obj.__getitem__(( uint32, Ellipses ))`             | `x -> max`                    |  
-  | `obj[ ..., ..., ... ]`                     | Ellipses | `obj.__getitem__(( Ellipses, Ellipses, Ellipses ))` | `min -> max`                  |  
-  | `obj[ ..., ... ]`                          | Ellipses | `obj.__getitem__(( Ellipses, Ellipses ))`           | `min -> max`                  |  
-
-  The first valid `np.uint32` value is assumed to be of an index kind and thus holding the indexing settings.  
-  If none are provided, assumes standard byte indexing.  
+  - Slices  
+    - `obj[ np.uint32|None : np.uint32|None : np.uint32|None ]` / `obj.__getitem__( slice( np.uint32|None, np.uint32|None, np.uint32|None ))`  
+    - If the last argument is a valid single index, its index settings apply to the whole slice  
+      This in addition to its regular job of step size - which should be encoded as its index value.  
+      If it's invalid, its _entire_ value is used as a step size, and default byte index settings apply.  
+    - Default arguments values are all `None`  
+    - Regular slice behaviour - includes start, excludes stop  
+      If unspecified, slices from `0` to `len(obj)` in steps of `1`  
 
   - Helper function  
 

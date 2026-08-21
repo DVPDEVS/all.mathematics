@@ -341,12 +341,8 @@ class UInt8192:
 		return self._to_int().to_bytes(128, 'little')
 
 # TODO: #52 UINT 
-	def __getitem__(self, indexer: 
-			slice[np.uint32,np.uint32,np.uint32|None] |
-			tuple[Literal[Ellipsis]|np.uint32, Literal[Ellipsis]|np.uint32, Literal[Ellipsis]|np.uint32] | #type: ignore
-			tuple[Literal[Ellipsis]|np.uint32, Literal[Ellipsis]|np.uint32] | #type: ignore
-			Literal[Ellipsis] | #type: ignore
-			np.uint32
+	def __getitem__(self,
+			indexer: np.uint32 | slice[np.uint32|None,np.uint32|None,np.uint32|None]
 			)-> Types.allUIntsUnion:
 		if type(indexer) == np.uint32:
 			index = indexer
@@ -889,7 +885,7 @@ class Types:
 		if version == 0:
 			lookup_values = Types.index_lookup_helper(type, modeval)
 			if indexvalue >= lookup_values.indexvalue_max: # just in case you dont rember the mode chart
-				return np.uin8(0), IndexError(f"Index {indexvalue} is out of range for type {type} when {lookup_values.name.capitalize()} indexing")
+				return np.uint8(0), IndexError(f"Index {indexvalue} is out of range for type {type} when {lookup_values.name.capitalize()} indexing")
 		return np.uint8(1), None
 
 	def index_encode(mode: Types.uintsUnion32 = np.uint8(2), indexvalue: Types.uintsUnion32 = np.uint32(0), *,
