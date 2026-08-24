@@ -479,11 +479,8 @@ class UInt8192:
 
 # TODO: #51 UINT 
 	def __setitem__(self, indexer: 
-			slice[np.uint32|None,np.uint32|None,np.uint32|None] |
-			tuple[Literal[Ellipsis]|np.uint32, Literal[Ellipsis]|np.uint32, Literal[Ellipsis]|np.uint32] | #type: ignore
-			tuple[Literal[Ellipsis]|np.uint32, Literal[Ellipsis]|np.uint32] | #type: ignore
-			Literal[Ellipsis] | #type: ignore
-			np.uint32,
+			np.uint32 |
+			slice[np.uint32|None,np.uint32|None,np.uint32|None],
 			value: Types.allUIntsUnion
 			)-> Types.allUIntsUnion:
 		if type(indexer) == np.uint32:
@@ -849,98 +846,6 @@ class Types:
 	# Float512H = Float512H
 	# Float256H = Float256H
 	# Float128H = Float128H
-
-	def index_decode(index: np.uint32)->tuple[np.uint32,]:
-		modeval: np.uint32 = (index & np.uint32(0x78000000)) >> np.uint8(27) # mask = 0b01111000000000000000000000000000
-		version: np.uint32 = (index & np.uint32(0x80000000)) >> np.uint8(31) # mask = 0b1000...
-		sign: np.uint32 = (index & np.uint32(0x40000)) >> np.uint8(18)
-		chunkselect: np.uint32 = (index & np.uint32(0x20000)) >> np.uint8(17)
-		endianness: np.uint32 = (index & np.uint32(0x10000)) >> np.uint8(16)
-		indexvalue: np.uint32 = index & np.uint32(0xFFFF)
-		return (version, modeval, sign, chunkselect, endianness, indexvalue)
-
-	def index_validate(index: np.uint32)->tuple[np.uint8, NotImplementedError|ValueError|None]:
-		"""
-		Returns a validation signal uint8 and what, if anything, was wrong.
-		"""
-		#? avoid returning bools or ints for memory savings. see readme for more info
-		if index & 0x80000000 != np.uint32(0): #? check for version. current only applicable is v1, or 0b0...
-			return np.uint8(0), NotImplementedError("Version 2 has not been implemented")
-		mode = (index & np.uint32(0x78000000)) >> np.uint8(27)
-		mask = np.uint32(0)
-		for _ in range(mode+3): # v1 uses 3 less bits for index values than reserved
-			mask >>= 1
-			mask |= np.uint32(0x8000)
-		indexvalue = index & np.uint32(0xFFFF)
-		indexvaluemasked = (indexvalue & ~mask)
-		if indexvalue != indexvaluemasked:
-			return np.uint8(0), ValueError("Index is out of range for index type")
-		return np.uint8(1), None
-
-	def index_match(index: np.uint32, type: str)->tuple[np.uint8, None|IndexError]:
-		version, modeval, _a, _b, _c, indexvalue = Types.index_decode(index)
-		version		= np.uint8(version)
-		modeval		= np.uint8(modeval)
-		indexvalue	= np.uint16(indexvalue)
-		if version == 0:
-			lookup_values = Types.index_lookup_helper(type, modeval)
-			if indexvalue >= lookup_values.indexvalue_max: # just in case you dont rember the mode chart
-				return np.uint8(0), IndexError(f"Index {indexvalue} is out of range for type {type} when {lookup_values.name.capitalize()} indexing")
-		return np.uint8(1), None
-
-	def index_encode(mode: Types.uintsUnion32 = np.uint8(2), indexvalue: Types.uintsUnion32 = np.uint32(0), *,
-			#! btw best for memory reasons to use the smalles uints you can, so here i'd pass np.uint8 for mode
-			signed: bool|np.uint8 = np.uint8(0),
-			littleEndian: bool|np.uint8 = np.uint8(1),
-			chunkselect: bool|np.uint8|None = None,
-			version2: bool|np.uint8 = np.uint8(0)) -> np.uint32:
-		"""Generates an index value `np.uint32` for indexing bigint/biguint types"""
-		index = np.uint32(0)
-		#? Casting to uint32s to avoid outbounding :3
-		mode = np.uint32 (mode & 0xF) #? mask out mode to lower 4 bits with an and operation
-		signed = np.uint32(signed & 0b1) # bool value
-		littleEndian = np.uint32(littleEndian & 0b1) # bool value
-		chunkselect = np.uint32(chunkselect & 0b1) if chunkselect is not None else None # bool value uwu
-		indexvalue = np.uint32(indexvalue & 0xFFFF) # can be up to 16 bits
-		index |= np.uint32(version2) << np.uint8(31)
-		index |= (mode << np.uint8(27)) # bit magic sets bits 30-27 to mode
-		#? This is an in-place bitwise or and a bitwise leftshift
-		index |= (signed << np.uint8(18))
-		if chunkselect != None:
-			index |= (chunkselect << np.uint8(17))
-		index |= (littleEndian << np.uint8(16))
-		mask = np.uint32(0) # build a mask for reserving bits in index value area/mask out indexvalue bits
-		for _ in range(mode+3):
-			mask >>= np.uint8(1) # right shift once
-			mask |= np.uint32(0x8000) # this ors in one high bit (0b1000...)
-		index |= (indexvalue & ~mask) # mask out ignored bits, just in case
-		"""
-		An example of an index which may be constructed with this:
-		mode = 3 [word]
-		signed = True [Negative value]
-		indexvalue = 391
-		==
-		0b 0001 1000 0000 0101 0000 0001 1000 0111
-		Bit 31 should be 0 as this is version 1								(0)
-		Bits 30-27 are the mode value clamped to 4 bits						(001 1)
-		Bits 26-19 are reserved 											0s
-		Bit 18 is the sign flag, indicating that this is a negative value 	(1)
-		Bit 17 is the chunk selection flag, set to 							0
-		Bit 16 is the endian indicator, set to little 						(1)
-		Bits 15-13 were masked out from the indexvalue 						(0s)
-		Bits 12-0 are our index 											(0 0001 1000 0111) (391)
-		//
-		Another example:
-		mode = 0
-		signed = False
-		indexvalue = 6753
-		==
-		0b 0000 0000 0000 0001 0001 1010 0110 0001
-		even then, in version one, the index is limited to certain max values. In this case, none of the
-		first 3 digits in the index matter, as the highest value accepted is 8191, while 16 bits can
-		supply 65535, and 13 bits = 0x1fff = 0b 0001 1111 1111 1111 = 8191
-		"""
-		return np.uint32(index)
 
 	#? Unions for type hinting
 	#? Only indicate compatibility, thus all lower bit values are included too.
