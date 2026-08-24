@@ -342,139 +342,15 @@ class UInt8192:
 
 # TODO: #52 UINT 
 	def __getitem__(self,
-			indexer: np.uint32 | slice[np.uint32|None,np.uint32|None,np.uint32|None]
+			index: np.uint32 | slice[np.uint32|None,np.uint32|None,np.uint32|None]
 			)-> Types.allUIntsUnion:
-		if type(indexer) == np.uint32:
-			index = indexer
-			check = Types.index_validate(index)
-			if check[0] == np.uint8(1):
-				version, modeval, sign, chunkselect, endianness, indexvalue = Types.index_decode(index)
-				version		 = np.uint8(version)
-				modeval		 = np.uint8(modeval)
-				sign		 = np.uint8(sign)
-				chunkselect  = np.uint8(chunkselect)
-				endianness	 = np.uint8(endianness)
-				indexvalue	 = np.uint16(indexvalue)
-				if version == 0: #! this is okay because numpy operations are very quick :3c
-					if modeval == np.uint8(0)  and indexvalue >= np.uint16(8192): # just in case you dont rember the mode chart
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when bit indexing")
-					if modeval == np.uint8(1)  and indexvalue >= np.uint16(2048):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when nybble indexing")
-					if modeval == np.uint8(2)  and indexvalue >= np.uint16(1024):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when byte indexing")
-					if modeval == np.uint8(3)  and indexvalue >= np.uint16(512):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when Word indexing")
-					if modeval == np.uint8(4)  and indexvalue >= np.uint16(256):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when DWord indexing")
-					if modeval == np.uint8(5)  and indexvalue >= np.uint16(128):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when QWord indexing")
-					if modeval == np.uint8(6)  and indexvalue >= np.uint16(64):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt128 indexing")
-					if modeval == np.uint8(7)  and indexvalue >= np.uint16(32):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt256 indexing")
-					if modeval == np.uint8(8)  and indexvalue >= np.uint16(16):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt512 indexing")
-					if modeval == np.uint8(9)  and indexvalue >= np.uint16(8):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt1024 indexing")
-					if modeval == np.uint8(10) and indexvalue >= np.uint16(4):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt2048 indexing")
-					if modeval == np.uint8(11) and indexvalue >= np.uint16(2):
-						raise IndexError(f"Index {indexvalue} is out of range for type {type(self)} when UInt4096 indexing")
-					# else: raise ValueError(f"Value not supported for version 1 indexing of {type(self)}")
-					try:
-						if modeval == np.uint8(0): # bit indexing
-							number = np.uint64(indexvalue) % 64
-							element = self.chunks[indexvalue // 64]
-							mask = np.uint64(1) << number
-							return element & mask
-						if modeval == np.uint8(1): # nybble indexing
-							number = np.uint64(indexvalue) % 16
-							element = self.chunks[indexvalue // 16]
-							mask = np.uint64(0xF) << (number * 4) # shift is multiplied with the amount of return bits :3
-							return element & mask
-						if modeval == np.uint8(2): # byte indexing
-							number = np.uint64(indexvalue) % 8
-							element = self.chunks[indexvalue // 8]
-							mask = np.uint64(0xFF) << (number * 8)
-							return element & mask
-						if modeval == np.uint8(3): # word indexing
-							number = np.uint64(indexvalue) % 4
-							element = self.chunks[indexvalue // 4]
-							mask = np.uint64(0xFFFF) << (number * 16)
-							return element & mask
-						if modeval == np.uint8(4): # dword indexing
-							number = np.uint64(indexvalue) % 2
-							element = self.chunks[indexvalue // 2]
-							mask = np.uint64(0xFFFFFFFF) << (number * 32)
-							return element & mask
-						if modeval == np.uint8(5): # qword / chunk indexing
-							return self.chunks[indexvalue]
-						#? further returns require lower biguints added, but ill set up for it now anyways
-						if modeval == np.uint8(6): # UInt128 indexing
-							value = Types.UInt128(0) #! Just realized these are gonna require recursive indexing... Fuck me. Hard.
-							for i in range(2): #! also i cant explain this for some reason but like ik this is a hard requirement. trust me bro
-								value[i] = self.chunks[(indexvalue * 2) + i]
-							return value
-						if modeval == np.uint8(7): # UInt256 indexing
-							value = Types.UInt256(0)
-							for i in range(4):
-								value[i] = self.chunks[(indexvalue * 4) + i]
-							return value
-						if modeval == np.uint8(8): # UInt512 indexing
-							value = Types.UInt512(0)
-							for i in range(8):
-								value[i] = self.chunks[(indexvalue * 8) + i]
-							return value
-						if modeval == np.uint8(9): # UInt1024 indexing
-							value = Types.UInt1024(0)
-							for i in range(16):
-								value[i] = self.chunks[(indexvalue * 16) + i]
-							return value
-						if modeval == np.uint8(10): # UInt2048 indexing
-							value = Types.UInt2048(0)
-							for i in range(32):
-								value[i] = self.chunks[(indexvalue * 32) + i]
-							return value
-						if modeval == np.uint8(11): # UInt4096 indexing
-							value = Types.UInt4096(0)
-							for i in range(64): #! I am actively convincing myself that this will actually work and i dont like it
-								value[i] = self.chunks[(indexvalue * 64) + i]
-							return value
-						else: raise ValueError(f"Indexing type not supported by version 1 indexing of {type(self)}")
-					except IndexError: raise IndexError("Index value is out of bounds for index type")
-				else: raise NotImplementedError("Version 2 has not been implemented for this version yet.")
-			else: 
-				if check[1] is not None: raise check[1]
-				else: raise ValueError(check[0])
-		elif type(indexer) == slice:
-			# validate the input and assign to usable vars
-			start, end, step = np.uint32(0), np.uint32(len(self)), np.uint32(1)
-			type_s, type_e, type_p = type(indexer[0]), type(indexer[1]), type(indexer[2])
-			if type_s == None & type_e == None & type_p == None: raise ValueError(f"Invalid slice object!\n> [{indexer}]\n")
-			# Check for valid encoded index values
-			if type_s != None:
-				start = indexer[0]
-				check = Types.index_validate(start)
-				if not check[0] == 1: raise check[1]
-			elif type_e != None:
-				end = indexer[1]
-				check = Types.index_validate(end)
-				if not check[0] == 1: raise check[1]
-			elif type_p != None:
-				step = indexer[2]
-				check = Types.index_validate(step)
-				if not check[0] == 1: raise check[1]
-			else: # use default index settings
-				check = Types.index_encode()
-			version, modeval, sign, chunkselect, endianness, indexvalue = Types.index_decode(check)
-			version		 = np.uint8(version)
-			modeval		 = np.uint8(modeval)
-			sign		 = np.uint8(sign)
-			chunkselect  = np.uint8(chunkselect)
-			endianness	 = np.uint8(endianness)
-			indexvalue	 = np.uint16(indexvalue)
-			# reassign indexvalue to whichever conributed it
-			# Next, use settings to make a new copy containing only the sliced elements
+		if type(index) == np.uint32:
+			if index >= Types._MAX_INDEX_BY_TYPE.UInt8192:
+				raise IndexError(f'Index {index} is out of range for UInt8192')
+			else:
+				...
+		elif type(index) == slice:
+			...
 
 
 # TODO: #51 UINT 
@@ -874,8 +750,8 @@ class Types:
 	# allIntUIntsUnion = Union[allIntsUnion,     allUIntsUnion																					]
 	# allFloatsUnion32 = Union[bigFloatsUnion32, floatsUnion32																					]
 	# allFloatsUnion64 = Union[bigFloatsUnion64, floatsUnion64																					]
-	# bit32Union		 = Union[allIntsUnion32,   allUIntsUnion32, allFloatsUnion32																]
-	# bit32Union		 = Union[allIntsUnion64,   allUIntsUnion64, allFloatsUnion64																]
+	# allBit32Union		 = Union[allIntsUnion32,   allUIntsUnion32, allFloatsUnion32																]
+	# allBit64Union		 = Union[allIntsUnion64,   allUIntsUnion64, allFloatsUnion64																]
 	# allBigTypesUnion = Union[bigIntsUnion32,   bigIntsUnion64,  bigUIntsUnion32, bigUIntsUnion64, bigFloatsUnion32, bigFloatsUnion64			]
 
 	#? Tuples for type checking
@@ -894,102 +770,55 @@ class Types:
 	uinttypes32		 = (	 np.uint8,   	   np.uint16,  		np.uint32,  	 np.uintc														)
 	floattypes32	 = (	 np.float16, 	   np.float32, 		np.float64																		)
 
+	#? repurpose this
 	@dataclass(frozen=True, slots=True) # OOooOoOoooOohhhhHHHHHhHhhH so fancy you are now.
-	class _INDEX_LOOKUP_SET(metaclass=_ImmutableConstMeta): # Make Immutable
-		name           : Final[str]
-		modeval        : Final[np.uint8]
-		indexvalue_max : Final[np.uint16] # Declared uninitialized ∴ Struct
-
-	@dataclass(frozen=True, slots=True)
-	class _INDEX_LOOKUP_NAMES(metaclass=_ImmutableConstMeta): # Declared with valuesֹ ∴ Enum
-		BIT      : Final[str] = "bit"
-		NYBBLE   : Final[str] = "nybble"
-		BYTE     : Final[str] = "byte"
-		WORD     : Final[str] = "word"
-		DWORD    : Final[str] = "dword"
-		QWORD    : Final[str] = "qword"
-		UINT128  : Final[str] = "uint128"
-		UINT256  : Final[str] = "uint256"
-		UINT512  : Final[str] = "uint512"
-		UINT1024 : Final[str] = "uint1024" #! As you can tell, i hate writing strings
-		UINT2048 : Final[str] = "uint2048"
-		UINT4096 : Final[str] = "uint4096"
-		UINT8192 : Final[str] = "uint8192"
-
-	@dataclass(frozen=True, slots=True)
-	class _INDEX_LOOKUP_BITCOUNTS(metaclass=_ImmutableConstMeta): # Declared with valuesֹ ∴ Enum
-		BIT      : Final[int] = 1
-		NYBBLE   : Final[int] = 4
-		BYTE     : Final[int] = 8
-		WORD     : Final[int] = 16
-		DWORD    : Final[int] = 32
-		QWORD    : Final[int] = 64
-		UINT128  : Final[int] = 128
-		UINT256  : Final[int] = 256
-		UINT512  : Final[int] = 512
-		UINT1024 : Final[int] = 1024
-		UINT2048 : Final[int] = 2048
-		UINT4096 : Final[int] = 4096
-		UINT8192 : Final[int] = 8192
-
-	#? Lookup table for index type, mode value, and expected indexvalue max size
-	index_lookup_table: dict[str, dict[str, list[type[_INDEX_LOOKUP_SET]]]] = {"v1":{},}
-
-	# populate the table! (i cant even read this ffs)
-	# TODO: #84 Verify this bullshit works
-	name_fields = fields(_INDEX_LOOKUP_NAMES)
-	bitcount_fields = fields(_INDEX_LOOKUP_BITCOUNTS)
-	# Build canonical progression of bit sizes (largest → smallest)
-	bit_progression = sorted((getattr(Types._INDEX_LOOKUP_BITCOUNTS, f.name) for f in bitcount_fields), reverse=True)
-	# Precompute bit-size → symbolic name mapping
-	bits_to_name = {getattr(Types._INDEX_LOOKUP_BITCOUNTS, f.name): getattr(Types._INDEX_LOOKUP_NAMES, f.name) for f in name_fields}
-	# Versioned lookup table root
-	index_lookup_table = {"v1": {}}
-	# OUTER LOOP:
-	# For each total container size, generate all valid sub-indexing modes.
-	# Iteration is largest → smallest to preserve dominance ordering.
-	for total_field in reversed(name_fields):
-		total_bits = getattr(_INDEX_LOOKUP_BITCOUNTS, total_field.name)
-		total_name = getattr(_INDEX_LOOKUP_NAMES, total_field.name)
-		sub_modes: list[_INDEX_LOOKUP_SET] = []
-		modeval = 0
-		# INNER LOOP:
-		# Walk descending bit sizes and admit only strictly smaller index modes.
-		for sub_bits in bit_progression:
-			# Reject self and impossible (larger) sub-index types
-			if sub_bits >= total_bits:
-				continue
-			# Maximum valid index value for this sub-mode
-			max_index = total_bits // sub_bits
-			sub_modes.append(
-				_INDEX_LOOKUP_SET(
-					name=bits_to_name[sub_bits],
-					modeval=np.uint8(modeval),
-					indexvalue_max=np.uint16(max_index),
-				)
-			)
-			modeval += 1
-		# Register computed modes under this total container type
-		index_lookup_table["v1"][total_name] = sub_modes
-
-	# and helper function bc this isnt hilariously easy to parse without being fwb with the structure
-	@staticmethod
-	def index_lookup_helper(
-			type: str,
-			index: Types.allIntUIntsUnion|str = np.uint8(0),
-			version: str = "v1"
-			) -> type[_INDEX_LOOKUP_SET]|ValueError:
-		try:
-			for arr in Types.index_lookup_table[version][type]:
-				if (arr.name == index) or (arr.modeval == index):
-					return arr
-			return ValueError("Value not found in lookup table : consider checking another way")
-		except Exception as e: raise ValueError("Exception occurred during lookup") from e
-
+	class _MAX_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta): # Make Immutable (unless you try WAY too hard but then its your problem)
+		# Declared initialized ∴ Enum
+		UInt8192 :Final[np.uint32] = 8191
+		UInt4096 :Final[np.uint32] = 4095
+		UInt2048 :Final[np.uint32] = 2047
+		UInt1024 :Final[np.uint32] = 1023
+		UInt512 :Final[np.uint32] = 511
+		UInt256 :Final[np.uint32] = 255
+		UInt128 :Final[np.uint32] = 127
+		Int8192 :Final[np.uint32] = 8191
+		Int4096 :Final[np.uint32] = 4095
+		Int2048 :Final[np.uint32] = 2047
+		Int1024 :Final[np.uint32] = 1023
+		Int512 :Final[np.uint32] = 511
+		Int256 :Final[np.uint32] = 255
+		Int128 :Final[np.uint32] = 127
+		Float8192 :Final[np.uint32] = 8191
+		Float4096 :Final[np.uint32] = 4095
+		Float2048 :Final[np.uint32] = 2047
+		Float1024 :Final[np.uint32] = 1023
+		Float512 :Final[np.uint32] = 511
+		Float256 :Final[np.uint32] = 255
+		Float128 :Final[np.uint32] = 127
+		UInt8192H :Final[np.uint32] = 8191
+		UInt4096H :Final[np.uint32] = 4095
+		UInt2048H :Final[np.uint32] = 2047
+		UInt1024H :Final[np.uint32] = 1023
+		UInt512H :Final[np.uint32] = 511
+		UInt256H :Final[np.uint32] = 255
+		UInt128H :Final[np.uint32] = 127
+		Int8192H :Final[np.uint32] = 8191
+		Int4096H :Final[np.uint32] = 4095
+		Int2048H :Final[np.uint32] = 2047
+		Int1024H :Final[np.uint32] = 1023
+		Int512H :Final[np.uint32] = 511
+		Int256H :Final[np.uint32] = 255
+		Int128H :Final[np.uint32] = 127
+		Float8192H :Final[np.uint32] = 8191
+		Float4096H :Final[np.uint32] = 4095
+		Float2048H :Final[np.uint32] = 2047
+		Float1024H :Final[np.uint32] = 1023
+		Float512H :Final[np.uint32] = 511
+		Float256H :Final[np.uint32] = 255
+		Float128H :Final[np.uint32] = 127
 
 class MathF:
 	"""Functions and supporting variables"""
-
 
 	def frexp(bigint: Types.bigIntsUnion64|Types.bigIntsUnion32)->tuple[np.ndarray[int, np.uint64|np.uint32], int]:
 		"""Convert a bigint type (this library's int and uint types) to a floating point type. Returns the mantissa and exponent, not an object."""
