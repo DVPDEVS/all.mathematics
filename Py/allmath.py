@@ -343,7 +343,7 @@ class UInt8192:
 # TODO: #52 UINT 
 	def __getitem__(self,
 			index: np.uint32 | slice[np.uint32|None,np.uint32|None,np.uint32|None]
-			)-> np.uint8|np.ndarray[np._AnyShapeT,np.uint8]:
+			)-> np.uint8|np.ndarray[np._1DShapeT,np.uint8]:
 		"""
 		Return a single `np.uint8` or a generic 1D `np.ndarray(shape=tuple[int], dtype=np.uint8)`
 		"""
