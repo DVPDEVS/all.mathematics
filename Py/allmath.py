@@ -343,15 +343,26 @@ class UInt8192:
 # TODO: #52 UINT 
 	def __getitem__(self,
 			index: np.uint32 | slice[np.uint32|None,np.uint32|None,np.uint32|None]
-			)-> Types.allUIntsUnion:
+			)-> np.uint8|np.ndarray[np._AnyShapeT,np.uint8]:
+		"""
+		Return a single `np.uint8` or a generic 1D `np.ndarray(shape=tuple[int], dtype=np.uint8)`
+		"""
 		if type(index) == np.uint32:
-			if index >= Types._MAX_INDEX_BY_TYPE.UInt8192:
+			if index > Types._MAX_INDEX_BY_TYPE.UInt8192:
 				raise IndexError(f'Index {index} is out of range for UInt8192')
 			else:
-				...
+				number :np.uint64 = np.uint64(index) % 8 # which byte
+				element :np.uint64 = self.chunks[index // 8] # which chunk
+				return np.uint8((element >> (number * 8)) & 0xFF) # extract and return
 		elif type(index) == slice:
-			...
-
+			# can be improved later but for now imma use a generator
+			arr :list[np.uint8]= []
+			for idx in range(
+					0 if not index[0] else index[0],
+					self.chunks.__len__()*8 if not index[1] else index[1],
+					1 if not index[2] else index[2]
+				): arr.append(self.__getitem__(np.uint32(idx)))
+			return np.arr(arr, np.uint8)
 
 # TODO: #51 UINT 
 	def __setitem__(self, indexer: 
@@ -774,48 +785,48 @@ class Types:
 	@dataclass(frozen=True, slots=True) # OOooOoOoooOohhhhHHHHHhHhhH so fancy you are now.
 	class _MAX_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta): # Make Immutable (unless you try WAY too hard but then its your problem)
 		# Declared initialized ∴ Enum
-		UInt8192 :Final[np.uint32] = 8191
-		UInt4096 :Final[np.uint32] = 4095
-		UInt2048 :Final[np.uint32] = 2047
-		UInt1024 :Final[np.uint32] = 1023
-		UInt512 :Final[np.uint32] = 511
-		UInt256 :Final[np.uint32] = 255
-		UInt128 :Final[np.uint32] = 127
-		Int8192 :Final[np.uint32] = 8191
-		Int4096 :Final[np.uint32] = 4095
-		Int2048 :Final[np.uint32] = 2047
-		Int1024 :Final[np.uint32] = 1023
-		Int512 :Final[np.uint32] = 511
-		Int256 :Final[np.uint32] = 255
-		Int128 :Final[np.uint32] = 127
-		Float8192 :Final[np.uint32] = 8191
-		Float4096 :Final[np.uint32] = 4095
-		Float2048 :Final[np.uint32] = 2047
-		Float1024 :Final[np.uint32] = 1023
-		Float512 :Final[np.uint32] = 511
-		Float256 :Final[np.uint32] = 255
-		Float128 :Final[np.uint32] = 127
-		UInt8192H :Final[np.uint32] = 8191
-		UInt4096H :Final[np.uint32] = 4095
-		UInt2048H :Final[np.uint32] = 2047
-		UInt1024H :Final[np.uint32] = 1023
-		UInt512H :Final[np.uint32] = 511
-		UInt256H :Final[np.uint32] = 255
-		UInt128H :Final[np.uint32] = 127
-		Int8192H :Final[np.uint32] = 8191
-		Int4096H :Final[np.uint32] = 4095
-		Int2048H :Final[np.uint32] = 2047
-		Int1024H :Final[np.uint32] = 1023
-		Int512H :Final[np.uint32] = 511
-		Int256H :Final[np.uint32] = 255
-		Int128H :Final[np.uint32] = 127
+		UInt8192   :Final[np.uint32] = 8191
+		UInt4096   :Final[np.uint32] = 4095
+		UInt2048   :Final[np.uint32] = 2047
+		UInt1024   :Final[np.uint32] = 1023
+		UInt512    :Final[np.uint32] = 511
+		UInt256    :Final[np.uint32] = 255
+		UInt128    :Final[np.uint32] = 127
+		Int8192    :Final[np.uint32] = 8191
+		Int4096    :Final[np.uint32] = 4095
+		Int2048    :Final[np.uint32] = 2047
+		Int1024    :Final[np.uint32] = 1023
+		Int512     :Final[np.uint32] = 511
+		Int256     :Final[np.uint32] = 255
+		Int128     :Final[np.uint32] = 127
+		Float8192  :Final[np.uint32] = 8191
+		Float4096  :Final[np.uint32] = 4095
+		Float2048  :Final[np.uint32] = 2047
+		Float1024  :Final[np.uint32] = 1023
+		Float512   :Final[np.uint32] = 511
+		Float256   :Final[np.uint32] = 255
+		Float128   :Final[np.uint32] = 127
+		UInt8192H  :Final[np.uint32] = 8191
+		UInt4096H  :Final[np.uint32] = 4095
+		UInt2048H  :Final[np.uint32] = 2047
+		UInt1024H  :Final[np.uint32] = 1023
+		UInt512H   :Final[np.uint32] = 511
+		UInt256H   :Final[np.uint32] = 255
+		UInt128H   :Final[np.uint32] = 127
+		Int8192H   :Final[np.uint32] = 8191
+		Int4096H   :Final[np.uint32] = 4095
+		Int2048H   :Final[np.uint32] = 2047
+		Int1024H   :Final[np.uint32] = 1023
+		Int512H    :Final[np.uint32] = 511
+		Int256H    :Final[np.uint32] = 255
+		Int128H    :Final[np.uint32] = 127
 		Float8192H :Final[np.uint32] = 8191
 		Float4096H :Final[np.uint32] = 4095
 		Float2048H :Final[np.uint32] = 2047
 		Float1024H :Final[np.uint32] = 1023
-		Float512H :Final[np.uint32] = 511
-		Float256H :Final[np.uint32] = 255
-		Float128H :Final[np.uint32] = 127
+		Float512H  :Final[np.uint32] = 511
+		Float256H  :Final[np.uint32] = 255
+		Float128H  :Final[np.uint32] = 127
 
 class MathF:
 	"""Functions and supporting variables"""
