@@ -359,7 +359,7 @@ class UInt8192:
 			arr :list[np.uint8]= []
 			for idx in range(
 					0 if not index[0] else index[0],
-					self.chunks.__len__()*8 if not index[1] else index[1],
+					Types._MAX_INDEX_BY_TYPE[type(self)] if not index[1] else index[1],
 					1 if not index[2] else index[2]
 				): arr.append(self.__getitem__(np.uint32(idx)))
 			return np.arr(arr, np.uint8)
@@ -842,22 +842,5 @@ class MathF:
 		normalized = bigint << shift
 		exponent = bitcount
 		return normalized, exponent
-
-	indexmodes = {
-		'bit'		:0b00000, # np.uint8
-		'nybble'	:0b00001, # np.uint8
-		'byte'		:0b00010, # np.uint8
-		'word'		:0b00011, # np.uint16
-		'dword'		:0b00100, # np.uint32
-		'qword'		:0b00101, # np.uint64
-		'uint128'	:0b00110, # Types.UInt128
-		'uint256'	:0b00111, # Types.UInt256
-		'uint512'	:0b01000, # Types.UInt512
-		'uint1024'	:0b01001, # Types.UInt1024
-		'uint2048'	:0b01010, # Types.UInt2048
-		'uint4096'	:0b01011, # Types.UInt4096
-		#! and more is coming in later versions
-	}
-
 
 
