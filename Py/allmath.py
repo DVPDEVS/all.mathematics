@@ -638,7 +638,8 @@ class Float8192:
 class Convert:
 	"""Conversion mainly between bases and types"""
 
-	def b05_to_b10_uint(encoded: Types.uintsUnion32|Types.uintsUnion64 = 0, max_precision: Types.uintsUnion32 = 16) -> tuple[Types.uintsUnion32|Types.uintsUnion64, Types.uintsUnion32]:
+	def b05_to_b10_uint(encoded: Types.uintsUnion32|Types.uintsUnion64 = 0, max_precision: Types.uintsUnion32 = 16
+		) -> tuple[Types.uintsUnion32|Types.uintsUnion64, Types.uintsUnion32]:
 		"""Convert a decimal fraction encoded in binary fixed-point as base 0.5 into a uint of the decimal digits and the number of digits\n
 		(To avoid losing leading zeros)"""
 		
@@ -656,21 +657,32 @@ class Convert:
 		return (numerator * p10) // denomINATOR, max_precision #! wont work until dunder methods have been added (floordiv)
 
 # TODO: #79 Rewrite to use np types
-	def b10_uint_to_b05(encoded_digits: Types.uintsUnion32|Types.uintsUnion64 = 0, max_precision: Types.uintsUnion32 = 16) -> tuple[Types.uintsUnion32|Types.uintsUnion64, Types.uintsUnion32]:
-		"""Convert base-10 decimal digits into a binary fixed-point encoded uint where each bit is 0.5^n"""
+	def b10_uint_to_b05(encoded_digits: Types.allUIntsUnion = 0, max_precision: Types.uintsUnion32 = 16
+		) -> tuple[Types.allUIntsUnion, Types.uintsUnion32]:
+		"""Convert base-10 decimal digits into a binary fixed-point encoded uint where each bit is 0.5^n  \n
+		```md
+		| Input | Decimal meaning | Result     | Binary meaning         |
+		| ----- | --------------- | ---------- | ---------------------- |
+		| 0     | 0               | (0, 1)     | 0 / 2                  |
+		| 25    | 0.25            | (1, 2)     | 1 / 4                  |
+		| 5     | 0.05            | (1, 1)     | 1 / 2                  |
+		| 125   | 0.125           | (1, 3)     | 1 / 8                  |
+		| 1     | 0.01            | (6553, 16) | 6553 / 65536 ≈ 0.09999 |
+		```
+		"""
 
 		if encoded_digits == 0:
 			return type(encoded_digits)(0), type(encoded_digits)(1)
-		decimal_digit_count = len(encoded_digits)
+		decimal_digit_count = np.uint16(len(str(encoded_digits)))
 		power_10 = 10 ** decimal_digit_count
 		for bits in range(1, int(max_precision) + 1):
 			multiplier = 1 << bits
 			if (int(encoded_digits) * multiplier) % power_10 == 0:
-				b05 = (int(encoded_digits) * multiplier) // power_10
+				b05 = encoded_digits * multiplier // power_10
 				return type(encoded_digits)(b05), type(encoded_digits)(bits)
 		#? fallback approximation
-		multiplier = 1 << int(max_precision)
-		b05 = (int(encoded_digits) * multiplier) // power_10
+		multiplier = 1 << max_precision
+		b05 = encoded_digits * multiplier // power_10
 		return type(encoded_digits)(b05), type(encoded_digits)(max_precision)
 
 
@@ -678,60 +690,60 @@ class Convert:
 class Types:
 	"""Simpler way to import, refer, check and hint to types"""
 	#? 64 bit
-	# UInt8192 = UInt8192
-	# UInt4096 = UInt4096
-	# UInt2048 = UInt2048
-	# UInt1024 = UInt1024
-	# UInt512 = UInt512
-	# UInt256 = UInt256
-	# UInt128 = UInt128
-	# Int8192 = Int8192
-	# Int4096 = Int4096
-	# Int2048 = Int2048
-	# Int1024 = Int1024
-	# Int512 = Int512
-	# Int256 = Int256
-	# Int128 = Int128
+	UInt8192 = UInt8192
+	UInt4096 = UInt4096
+	UInt2048 = UInt2048
+	UInt1024 = UInt1024
+	UInt512 = UInt512
+	UInt256 = UInt256
+	UInt128 = UInt128
+	Int8192 = Int8192
+	Int4096 = Int4096
+	Int2048 = Int2048
+	Int1024 = Int1024
+	Int512 = Int512
+	Int256 = Int256
+	Int128 = Int128
 	Float8192 = Float8192
-	# Float4096 = Float4096
-	# Float2048 = Float2048
-	# Float1024 = Float1024
-	# Float512 = Float512
-	# Float256 = Float256
-	# Float128 = Float128
+	Float4096 = Float4096
+	Float2048 = Float2048
+	Float1024 = Float1024
+	Float512 = Float512
+	Float256 = Float256
+	Float128 = Float128
 	#? 32 bit
-	# UInt8192H = UInt8192H
-	# UInt4096H = UInt4096H
-	# UInt2048H = UInt2048H
-	# UInt1024H = UInt1024H
-	# UInt512H = UInt512H
-	# UInt256H = UInt256H
-	# UInt128H = UInt128H
-	# Int8192H = Int8192H
-	# Int4096H = Int4096H
-	# Int2048H = Int2048H
-	# Int1024H = Int1024H
-	# Int512H = Int512H
-	# Int256H = Int256H
-	# Int128H = Int128H
-	# Float8192H = Float8192H
-	# Float4096H = Float4096H
-	# Float2048H = Float2048H
-	# Float1024H = Float1024H
-	# Float512H = Float512H
-	# Float256H = Float256H
-	# Float128H = Float128H
+	UInt8192H = UInt8192H
+	UInt4096H = UInt4096H
+	UInt2048H = UInt2048H
+	UInt1024H = UInt1024H
+	UInt512H = UInt512H
+	UInt256H = UInt256H
+	UInt128H = UInt128H
+	Int8192H = Int8192H
+	Int4096H = Int4096H
+	Int2048H = Int2048H
+	Int1024H = Int1024H
+	Int512H = Int512H
+	Int256H = Int256H
+	Int128H = Int128H
+	Float8192H = Float8192H
+	Float4096H = Float4096H
+	Float2048H = Float2048H
+	Float1024H = Float1024H
+	Float512H = Float512H
+	Float256H = Float256H
+	Float128H = Float128H
 
 	#? Unions for type hinting
 	#? Only indicate compatibility, thus all lower bit values are included too.
 	#? Just the larger values are excluded, like np.int_, which can be either 32 or 64 bit, and therefore is excluded from intsUnion32
 	#? Custom types
-	# bigUIntsUnion64  = Union[ UInt8192,   UInt4096,   UInt2048,   UInt1024,   UInt512,   UInt256,   UInt128   ]
-	# bigIntsUnion64   = Union[ Int8192,    Int4096,    Int2048,    Int1024,    Int512,    Int256,    Int128    ]
-	# bigFloatsUnion64 = Union[ Float8192,  Float4096,  Float2048,  Float1024,  Float512,  Float256,  Float128  ]
-	# bigUIntsUnion32  = Union[ UInt8192H,  UInt4096H,  UInt2048H,  UInt1024H,  UInt512H,  UInt256H,  UInt128H  ]
-	# bigIntsUnion32   = Union[ Int8192H,   Int4096H,   Int2048H,   Int1024H,   Int512H,   Int256H,   Int128H   ]
-	# bigFloatsUnion32 = Union[ Float8192H, Float4096H, Float2048H, Float1024H, Float512H, Float256H, Float128H ]
+	bigUIntsUnion64  = Union[ UInt8192,   UInt4096,   UInt2048,   UInt1024,   UInt512,   UInt256,   UInt128   ]
+	bigIntsUnion64   = Union[ Int8192,    Int4096,    Int2048,    Int1024,    Int512,    Int256,    Int128    ]
+	bigFloatsUnion64 = Union[ Float8192,  Float4096,  Float2048,  Float1024,  Float512,  Float256,  Float128  ]
+	bigUIntsUnion32  = Union[ UInt8192H,  UInt4096H,  UInt2048H,  UInt1024H,  UInt512H,  UInt256H,  UInt128H  ]
+	bigIntsUnion32   = Union[ Int8192H,   Int4096H,   Int2048H,   Int1024H,   Int512H,   Int256H,   Int128H   ]
+	bigFloatsUnion32 = Union[ Float8192H, Float4096H, Float2048H, Float1024H, Float512H, Float256H, Float128H ]
 	#? Native and numpy types
 	intsUnion64   = Union[ int,        np.int_,    np.int8,    np.int16,   np.int32,   np.int64, np.intc ]
 	uintsUnion64  = Union[ np.uint,    np.uint8,   np.uint16,  np.uint32,  np.uint64,  np.uintc          ]
@@ -740,27 +752,27 @@ class Types:
 	uintsUnion32  = Union[ np.uint8,   np.uint16,  np.uint32,  np.uintc                                  ]
 	floatsUnion32 = Union[ np.float16, np.float32                                                        ]
 	#? Combos
-	# allIntsUnion32   = Union[ bigIntsUnion32,   intsUnion32     ]
-	# allIntsUnion64   = Union[ bigIntsUnion64,   intsUnion64     ]
-	# allUIntsUnion32  = Union[ bigUIntsUnion32,  uintsUnion32    ]
-	# allUIntsUnion64  = Union[ bigUIntsUnion64,  uintsUnion64    ]
-	# allUIntsUnion    = Union[ allUIntsUnion32,  allUIntsUnion64 ]
-	# allIntsUnion     = Union[ allIntsUnion32,   allIntsUnion64  ]
-	# allIntUIntsUnion = Union[ allIntsUnion,     allUIntsUnion   ]
-	# allFloatsUnion32 = Union[ bigFloatsUnion32, floatsUnion32   ]
-	# allFloatsUnion64 = Union[ bigFloatsUnion64, floatsUnion64   ]
-	# allBit32Union    = Union[ allIntsUnion32,   allUIntsUnion32, allFloatsUnion32 ]
-	# allBit64Union    = Union[ allIntsUnion64,   allUIntsUnion64, allFloatsUnion64 ]
-	# allBigTypesUnion = Union[ bigIntsUnion32,   bigIntsUnion64,  bigUIntsUnion32, bigUIntsUnion64, bigFloatsUnion32, bigFloatsUnion64 ]
+	allIntsUnion32   = Union[ bigIntsUnion32,   intsUnion32     ]
+	allIntsUnion64   = Union[ bigIntsUnion64,   intsUnion64     ]
+	allUIntsUnion32  = Union[ bigUIntsUnion32,  uintsUnion32    ]
+	allUIntsUnion64  = Union[ bigUIntsUnion64,  uintsUnion64    ]
+	allUIntsUnion    = Union[ allUIntsUnion32,  allUIntsUnion64 ]
+	allIntsUnion     = Union[ allIntsUnion32,   allIntsUnion64  ]
+	allIntUIntsUnion = Union[ allIntsUnion,     allUIntsUnion   ]
+	allFloatsUnion32 = Union[ bigFloatsUnion32, floatsUnion32   ]
+	allFloatsUnion64 = Union[ bigFloatsUnion64, floatsUnion64   ]
+	allBit32Union    = Union[ allIntsUnion32,   allUIntsUnion32, allFloatsUnion32 ]
+	allBit64Union    = Union[ allIntsUnion64,   allUIntsUnion64, allFloatsUnion64 ]
+	allBigTypesUnion = Union[ bigIntsUnion32,   bigIntsUnion64,  bigUIntsUnion32, bigUIntsUnion64, bigFloatsUnion32, bigFloatsUnion64 ]
 
 	#? Sets for type checking
 	#? Custom types
-	# bigInttypes64   = { Int8192,    Int4096,    Int2048,    Int1024,    Int512,    Int256,    Int128    }
-	# bigUInttypes64  = { UInt8192,   UInt4096,   UInt2048,   UInt1024,   UInt512,   UInt256,   UInt128   }
-	# bigFloattypes64 = { Float8192,  Float4096,  Float2048,  Float1024,  Float512,  Float256,  Float128  }
-	# bigInttypes32   = { Int8192H,   Int4096H,   Int2048H,   Int1024H,   Int512H,   Int256H,   Int128H   }
-	# bigUInttypes32  = { UInt8192H,  UInt4096H,  UInt2048H,  UInt1024H,  UInt512H,  UInt256H,  UInt128H  }
-	# bigFloattypes32 = { Float8192H, Float4096H, Float2048H, Float1024H, Float512H, Float256H, Float128H }
+	bigInttypes64   = { Int8192,    Int4096,    Int2048,    Int1024,    Int512,    Int256,    Int128    }
+	bigUInttypes64  = { UInt8192,   UInt4096,   UInt2048,   UInt1024,   UInt512,   UInt256,   UInt128   }
+	bigFloattypes64 = { Float8192,  Float4096,  Float2048,  Float1024,  Float512,  Float256,  Float128  }
+	bigInttypes32   = { Int8192H,   Int4096H,   Int2048H,   Int1024H,   Int512H,   Int256H,   Int128H   }
+	bigUInttypes32  = { UInt8192H,  UInt4096H,  UInt2048H,  UInt1024H,  UInt512H,  UInt256H,  UInt128H  }
+	bigFloattypes32 = { Float8192H, Float4096H, Float2048H, Float1024H, Float512H, Float256H, Float128H }
 	#? Native/numpy types
 	inttypes64   = { np.int_,    np.int8,    np.int16,   np.int32, np.int64, int }
 	uinttypes64  = { np.uint,    np.uint16,  np.uint32,  np.uint64               }
