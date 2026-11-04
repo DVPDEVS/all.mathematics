@@ -365,36 +365,20 @@ class UInt8192:
 			return np.arr(arr, np.uint8)
 
 # TODO: #51 UINT 
-	def __setitem__(self, indexer: 
-			np.uint32 |
-			slice[np.uint32|None,np.uint32|None,np.uint32|None],
+	def __setitem__(self,
+			index: np.uint32 | slice[np.uint32|None,np.uint32|None,np.uint32|None],
 			value: Types.allUIntsUnion
-			)-> Types.allUIntsUnion:
-		if type(indexer) == np.uint32:
-			index = indexer
-			check = Types.index_validate(index)
-			if check[0] == np.uint8(1):
-				m : tuple[np.uint8, None|IndexError] = Types.index_match(index, "UInt8192")
-				if m[0] == np.uint8(1):
-					version, modeval, sign, chunkselect, endianness, indexvalue = Types.index_decode(index)
-					version		= np.uint8(version)
-					modeval		= np.uint8(modeval)
-					sign		= np.uint8(sign)
-					chunkselect = np.uint8(chunkselect)
-					endianness	= np.uint8(endianness)
-					indexvalue	= np.uint16(indexvalue)
-					try:
-						# generate masks
-						_len = np.uint64(0)
-						for _ in range(modeval):
-							_len |= 1; _len << 1
-						vmask = np.uint64(indexvalue)
-						...
-					except IndexError as e: raise IndexError("Unknown failure when indexing") from e 
-				else: raise m[1]
-			else: 
-				if check[1] is not None: raise check[1]
-				else: raise ValueError(check[0])
+			)-> bool:
+		if type(index) == np.uint32:
+			if index > Types._MAX_INDEX_BY_TYPE.UInt8192:
+				raise IndexError(f'Index {index} is out of range for UInt8192')
+			else:
+				number :np.uint64 = np.uint64(index) % 8 # which byte
+				element :np.uint64 = self.chunks[index // 8] # which chunk
+				try:
+					self.chunks[element][number] = ( value & 0xFF )
+				except Exception as e:
+					...
 
 # TODO: #50 UINT 
 	def __contains__(self, other: Types.allUIntsUnion|list[np.uint32]|tuple[np.uint32] = None)->bool:
