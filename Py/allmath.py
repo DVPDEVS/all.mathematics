@@ -340,7 +340,6 @@ class UInt8192:
 	def __bytes__(self)->bytes:
 		return self._to_int().to_bytes(128, 'little')
 
-# TODO: #52 UINT 
 	def __getitem__(self,
 			index: np.uint32 | slice[np.uint32|None,np.uint32|None,np.uint32|None]
 			)-> np.uint8|np.ndarray[np._1DShapeT,np.uint8]:
@@ -359,7 +358,7 @@ class UInt8192:
 			arr :list[np.uint8]= []
 			for idx in range(
 					0 if not index[0] else index[0],
-					Types._MAX_INDEX_BY_TYPE[type(self)] if not index[1] else index[1],
+					Types._MAX_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
 					1 if not index[2] else index[2]
 				): arr.append(self.__getitem__(np.uint32(idx)))
 			return np.arr(arr, np.uint8)
@@ -369,22 +368,27 @@ class UInt8192:
 			index: np.uint32 | slice[np.uint32|None,np.uint32|None,np.uint32|None],
 			value: Types.allUIntsUnion
 			)-> bool:
-		if type(index) == np.uint32:
+		if type(index) == np.uint32: # single byte index assignment
 			if index > Types._MAX_INDEX_BY_TYPE.UInt8192:
 				raise IndexError(f'Index {index} is out of range for UInt8192')
 			else:
 				number :np.uint64 = np.uint64(index) % 8 # which byte
 				element :np.uint64 = self.chunks[index // 8] # which chunk
+				value &= 0xFF
 				try:
-					self.chunks[element][number] = ( value & 0xFF )
+					self.chunks[element][number] = value
+					return True
 				except Exception as e:
-					...
+					return False
+		elif type(index) == slice:
+			...
 
 # TODO: #50 UINT 
 	def __contains__(self, other: Types.allUIntsUnion|list[np.uint32]|tuple[np.uint32] = None)->bool:
 		if other == None: raise TypeError("No value to check for was given")
 		elif type(other) in (list, tuple):
 			other = Types.UInt8192(0)
+			#! hashmap.
 			... #? basically index but the index value is the value were looking for instead of the position we're looking for D:
 			#? Gotta do this to check:
 			if ... == other: return True
