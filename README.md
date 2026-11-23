@@ -297,14 +297,14 @@ Default type sizes:
 #### Notes  
 
 The bigfloat types use an equivalent bigint and a fitting pointer: e.g. a `Float8192` uses an `Int8192` and a `np.uint16`  
-The memory usage is equivalent to these two separately; thus 1 kB + 2 B = 1026 B ≅ 1 kB  
+The memory usage is equivalent to these two separately; thus 1 kB + 2 B = 1026 B ~= 1 kB  
 This just allows for a different convention than IEEE 754: Namely that the bit count is the bit count of the MANTISSA.  
 The actual biggest value storable is thus any value fitting in the bigint, and decimal values down to a precision of: the bitcount - 1.  
 The exponent is also just the plain value instead of being biased  
 
 Everything else follows IEEE standards, simply due to being superstructures utilizing numpy's value types and arrays.  
 
-These bigfloats thus represent, e.g. a `Float8192`, between ∓4095.0 and like 0.000...01;  
+These bigfloats thus represent, e.g. a `Float8192`, between +/- 4095.0 and like 0.000...01;  
  \- an arbitrary variable precision between 8191 and 0 bits.  
 This is accomplished as described above by considering the value to be Mantissa/2^Exponent+{decimal value}  
 That allows for the exponent to define an arbitrary precision, default is 16 bits.  
