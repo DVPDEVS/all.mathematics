@@ -36,8 +36,8 @@ This means you can use this for a project covered by, say, Apache 2.0, MIT, CC0,
 
 ### System requirements  
 
-- Python ≥3.10 (32 or 64-bit)  
-- NumPy ≥1.20.0  
+- Python >=3.10 (32 or 64-bit)  
+- NumPy >=1.20.0  
 
 NB! Note on 32-bit systems:  
 32-bit Python should be able to run this library, but memory limitations (~2-3 GB) make it unsuitable for very  
