@@ -363,7 +363,6 @@ class UInt8192:
 				): arr.append(self.__getitem__(np.uint32(idx)))
 			return np.arr(arr, np.uint8)
 
-# TODO: #51 UINT 
 	def __setitem__(self,
 			index: np.uint32 | slice[np.uint32|None,np.uint32|None,np.uint32|None],
 			value: Types.allUIntsUnion
@@ -381,7 +380,15 @@ class UInt8192:
 				except Exception as e:
 					return False
 		elif type(index) == slice:
-			...
+			# can be improved later
+			succ: set[bool] = ()
+			for idx in range(
+					0 if not index[0] else index[0],
+					Types._MAX_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
+					1 if not index[2] else index[2]
+				):
+				succ += self.__setitem__(np.uint32(idx))
+			return all(succ) if succ != () else False
 
 # TODO: #50 UINT 
 	def __contains__(self, other: Types.allUIntsUnion|list[np.uint32]|tuple[np.uint32] = None)->bool:
