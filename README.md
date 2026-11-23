@@ -129,6 +129,7 @@ My estimate for the largest value storable in v2 is a UInt2097152, or roughly 25
     - Return type is `np.ndarray[np.uint8]`  
   - Ellipses  
     - Not supported cant bother just use a slice  
+  - Same goes for `__setitem__`.
 
 - Logic
   - Per now uses other types' logic for most things  
