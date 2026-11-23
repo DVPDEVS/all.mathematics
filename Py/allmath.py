@@ -279,44 +279,39 @@ class UInt8192:
 	def __irshift__(self, amount: UInt8192)->UInt8192:
 		return self
 
-	def __eq__(self, other: UInt8192)->bool:
-		for i in range(128):
-			if int(self.chunks[i]) != int(other.chunks[i]):
+	def __eq__(self, other: UInt8192)->bool: # equal
+		for i in range(Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+			if self.chunks[i] != other.chunks[i]:
 				return False
 		return True
 
-# TODO: #62 UINT 
-	def __ne__(self, other: UInt8192)->bool:
-		for i in range(128):
-			if int(self.chunks[i]) != int(other.chunks[i]):
+	def __ne__(self, other: UInt8192)->bool: # not equal
+		for i in range(Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+			if self.chunks[i] == other.chunks[i]:
 				return False
 		return True
 
-# TODO: #61 UINT 
-	def __lt__(self, other: UInt8192)->bool:
-		for i in range(128):
-			if int(self.chunks[i]) != int(other.chunks[i]):
+	def __lt__(self, other: UInt8192)->bool: # less than
+		for i in range(Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+			if self.chunks[i] >= other.chunks[i]:
 				return False
 		return True
 
-# TODO: #60 UINT 
-	def __le__(self, other: UInt8192)->bool:
-		for i in range(128):
-			if int(self.chunks[i]) != int(other.chunks[i]):
+	def __le__(self, other: UInt8192)->bool: # less than or equal
+		for i in range(Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+			if self.chunks[i] > other.chunks[i]:
 				return False
 		return True
 
-# TODO: #59 UINT 
-	def __gt__(self, other: UInt8192)->bool:
-		for i in range(128):
-			if int(self.chunks[i]) != int(other.chunks[i]):
+	def __gt__(self, other: UInt8192)->bool: # greater than
+		for i in range(Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+			if self.chunks[i] <= other.chunks[i]:
 				return False
 		return True
 
-# TODO: #58 UINT 
-	def __ge__(self, other: UInt8192)->bool:
-		for i in range(128):
-			if int(self.chunks[i]) != int(other.chunks[i]):
+	def __ge__(self, other: UInt8192)->bool: # greater than or equal
+		for i in range(Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+			if self.chunks[i] < other.chunks[i]:
 				return False
 		return True
 
@@ -324,17 +319,14 @@ class UInt8192:
 	def __del__(self)->UInt8192:
 		return self
 
-# TODO: #56 UINT 
 	def __int__(self)->int:
 		return self._to_int()
 
-# TODO: #54 UINT 
 	def __bool__(self)->bool:
-		return True if self._to_int() != 0 else False
+		return bool(self._to_int())
 
-# TODO: #55 UINT
 	def __str__(self)->str:
-		return repr(self).removesuffix(')').removeprefix('UInt8192(')
+		return str(self._to_int())
 
 # TODO: #53 UINT 
 	def __bytes__(self)->bytes:
@@ -347,7 +339,7 @@ class UInt8192:
 		Return a single `np.uint8` or a generic 1D `np.ndarray(shape=tuple[int], dtype=np.uint8)`
 		"""
 		if type(index) == np.uint32:
-			if index > Types._MAX_INDEX_BY_TYPE.UInt8192:
+			if index > Types._MAX_BIT_INDEX_BY_TYPE.UInt8192:
 				raise IndexError(f'Index {index} is out of range for UInt8192')
 			else:
 				number :np.uint64 = np.uint64(index) % 8 # which byte
@@ -358,7 +350,7 @@ class UInt8192:
 			arr :list[np.uint8]= []
 			for idx in range(
 					0 if not index[0] else index[0],
-					Types._MAX_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
+					Types._MAX_BIT_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
 					1 if not index[2] else index[2]
 				): arr.append(self.__getitem__(np.uint32(idx)))
 			return np.arr(arr, np.uint8)
@@ -368,7 +360,7 @@ class UInt8192:
 			value: Types.allUIntsUnion
 			)-> bool:
 		if type(index) == np.uint32: # single byte index assignment
-			if index > Types._MAX_INDEX_BY_TYPE.UInt8192:
+			if index > Types._MAX_BIT_INDEX_BY_TYPE.UInt8192:
 				raise IndexError(f'Index {index} is out of range for UInt8192')
 			else:
 				number :np.uint64 = np.uint64(index) % 8 # which byte
@@ -384,7 +376,7 @@ class UInt8192:
 			succ: set[bool] = ()
 			for idx in range(
 					0 if not index[0] else index[0],
-					Types._MAX_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
+					Types._MAX_BIT_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
 					1 if not index[2] else index[2]
 				):
 				succ += self.__setitem__(np.uint32(idx))
@@ -790,10 +782,55 @@ class Types:
 
 	#? repurpose this
 	@dataclass(frozen=True, slots=True) # OOooOoOoooOohhhhHHHHHhHhhH so fancy you are now.
-	class _MAX_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta): # Make Immutable (unless you try WAY too hard but then its your problem)
+	class _MAX_BIT_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta): # Make Immutable (unless you try WAY too hard but then its your problem)
 		# Declared initialized ∴ Enum
 		UInt8192   :Final[np.uint16] = 8191
 		UInt4096   :Final[np.uint16] = 4095
+		UInt2048   :Final[np.uint16] = 2047
+		UInt1024   :Final[np.uint16] = 1023
+		UInt512    :Final[np.uint16] = 511
+		UInt256    :Final[np.uint16] = 255
+		UInt128    :Final[np.uint16] = 127
+		Int8192    :Final[np.uint16] = 8191
+		Int4096    :Final[np.uint16] = 4095
+		Int2048    :Final[np.uint16] = 2047
+		Int1024    :Final[np.uint16] = 1023
+		Int512     :Final[np.uint16] = 511
+		Int256     :Final[np.uint16] = 255
+		Int128     :Final[np.uint16] = 127
+		Float8192  :Final[np.uint16] = 8191
+		Float4096  :Final[np.uint16] = 4095
+		Float2048  :Final[np.uint16] = 2047
+		Float1024  :Final[np.uint16] = 1023
+		Float512   :Final[np.uint16] = 511
+		Float256   :Final[np.uint16] = 255
+		Float128   :Final[np.uint16] = 127
+		UInt8192H  :Final[np.uint16] = 8191
+		UInt4096H  :Final[np.uint16] = 4095
+		UInt2048H  :Final[np.uint16] = 2047
+		UInt1024H  :Final[np.uint16] = 1023
+		UInt512H   :Final[np.uint16] = 511
+		UInt256H   :Final[np.uint16] = 255
+		UInt128H   :Final[np.uint16] = 127
+		Int8192H   :Final[np.uint16] = 8191
+		Int4096H   :Final[np.uint16] = 4095
+		Int2048H   :Final[np.uint16] = 2047
+		Int1024H   :Final[np.uint16] = 1023
+		Int512H    :Final[np.uint16] = 511
+		Int256H    :Final[np.uint16] = 255
+		Int128H    :Final[np.uint16] = 127
+		Float8192H :Final[np.uint16] = 8191
+		Float4096H :Final[np.uint16] = 4095
+		Float2048H :Final[np.uint16] = 2047
+		Float1024H :Final[np.uint16] = 1023
+		Float512H  :Final[np.uint16] = 511
+		Float256H  :Final[np.uint16] = 255
+		Float128H  :Final[np.uint16] = 127
+	@dataclass(frozen=True, slots=True) # OOooOoOoooOohhhhHHHHHhHhhH so fancy you are now.
+	class _MAX_BYTE_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta): # Make Immutable (unless you try WAY too hard but then its your problem)
+		# Declared initialized ∴ Enum
+		UInt8192   :Final[np.uint16] = 127
+		UInt4096   :Final[np.uint16] = 4095 # TODO: fill out the rest
 		UInt2048   :Final[np.uint16] = 2047
 		UInt1024   :Final[np.uint16] = 1023
 		UInt512    :Final[np.uint16] = 511
