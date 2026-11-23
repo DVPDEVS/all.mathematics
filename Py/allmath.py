@@ -339,7 +339,7 @@ class UInt8192:
 		Return a single `np.uint8` or a generic 1D `np.ndarray(shape=tuple[int], dtype=np.uint8)`
 		"""
 		if type(index) == np.uint32:
-			if index > Types._MAX_BIT_INDEX_BY_TYPE.UInt8192:
+			if index > Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192:
 				raise IndexError(f'Index {index} is out of range for UInt8192')
 			else:
 				number :np.uint64 = np.uint64(index) % 8 # which byte
@@ -350,7 +350,7 @@ class UInt8192:
 			arr :list[np.uint8]= []
 			for idx in range(
 					0 if not index[0] else index[0],
-					Types._MAX_BIT_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
+					Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
 					1 if not index[2] else index[2]
 				): arr.append(self.__getitem__(np.uint32(idx)))
 			return np.arr(arr, np.uint8)
@@ -360,7 +360,7 @@ class UInt8192:
 			value: Types.allUIntsUnion
 			)-> bool:
 		if type(index) == np.uint32: # single byte index assignment
-			if index > Types._MAX_BIT_INDEX_BY_TYPE.UInt8192:
+			if index > Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192:
 				raise IndexError(f'Index {index} is out of range for UInt8192')
 			else:
 				number :np.uint64 = np.uint64(index) % 8 # which byte
@@ -376,7 +376,7 @@ class UInt8192:
 			succ: set[bool] = ()
 			for idx in range(
 					0 if not index[0] else index[0],
-					Types._MAX_BIT_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
+					Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
 					1 if not index[2] else index[2]
 				):
 				succ += self.__setitem__(np.uint32(idx))
