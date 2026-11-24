@@ -35,6 +35,37 @@ class _ImmutableConstMeta(_ConstMeta):
 			if isinstance(type(base), _ImmutableConstMeta): raise TypeError("Const classes cannot be subclassed")
 		super().__init__(*args, **kwargs)
 
+# Hash table
+class HashTable:
+	__slots__ = ['size', 'hash_table']
+	def __init__(self, size):
+		self.size = size
+		self.hash_table = [[] for _ in range(size)]
+
+	def set_val(self, key, val):
+		hashed_key = hash(key) % self.size
+		bucket = self.hash_table[hashed_key]
+		for index, (record_key, _) in enumerate(bucket):
+			if record_key == key:
+				bucket[index] = (key, val)
+				return
+		bucket.append((key, val))
+
+	def get_val(self, key):
+		hashed_key = hash(key) % self.size
+		bucket = self.hash_table[hashed_key]
+		for record_key, record_val in bucket:
+			if record_key == key:
+				return record_val
+		return "No record found"
+
+	def delete_val(self, key):
+		hashed_key = hash(key) % self.size
+		bucket = self.hash_table[hashed_key]
+		for index, (record_key, _) in enumerate(bucket):
+			if record_key == key:
+				bucket.pop(index)
+				return
 
 # Custom type for storing 1024 byte unsigned integers
 class UInt8192:
@@ -44,7 +75,7 @@ class UInt8192:
 
 	MAX = (1 << 1024) -1
 
-	__slots__ = ['chunks']
+	__slots__ = ['chunks', '_hash_table']
 
 #! Avoiding subclassing int for the fine control applicable now :3
 #? (Im gonna have to create every magic method manually)
@@ -59,6 +90,7 @@ class UInt8192:
 
 	def __init__(self, value: int = 0):
 		self.chunks = np.zeros(128, dtype=np.uint64)
+		self._hash_table = HashTable(Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1)
 		self._from_int(value)
 
 	def _from_int(self, value: int = 0):
@@ -383,20 +415,18 @@ class UInt8192:
 			return all(succ) if succ != () else False
 
 # TODO: #50 UINT 
-	def __contains__(self, other: Types.allUIntsUnion|list[np.uint32]|tuple[np.uint32] = None)->bool:
+	def __contains__(self,
+			other: np.uint8|list[np.uint8]|tuple[np.uint8]|np.ndarray[np.uint8,np.uint8] = None
+			)->bool:
 		if other == None: raise TypeError("No value to check for was given")
-		elif type(other) in (list, tuple):
-			other = Types.UInt8192(0)
-			#! hashmap.
+		elif type(other) == np.uint8:
 			... #? basically index but the index value is the value were looking for instead of the position we're looking for D:
+			#! hashmap.
 			#? Gotta do this to check:
 			if ... == other: return True
 			other <<= ('some value based on other`s index type') 
-		else: # assume we good, index per chunk and comp to `other`
-			other = np.uint64(int(other))
-			for i in range(len(self.chunks)):
-				if self.chunks[i] == other: return True   
-			return False
+		elif type(other) in (list, tuple, np.ndarray):
+			... # repeated search in the same way
 
 # TODO: #49 UINT 
 	def __copy__(self)->UInt8192:
@@ -415,12 +445,13 @@ class Float8192:
 	"""This is a fixed-size signed 8192-bit float type. It IMMEDIATELY takes 1KB of ram."""
 
 	MAX = (1 << 1024) -1
-	__slots__ = ['mantissa', 'mantissa_signed', 'exponent']
+	__slots__ = ['mantissa', 'mantissa_signed', 'exponent', '_hash_table']
 
 	def __init__(self, value: int|Types.uintsUnion64|Types.uintsUnion32 = 0, *, precision: int|Types.uintsUnion64|Types.uintsUnion32 = 16):
 		self.mantissa = np.zeros(127, dtype=np.uint64)
 		self.mantissa_signed = np.int64(0)
 		self.exponent = np.uint16(precision)
+		self._hash_table = HashTable(Types._MAX_BYTE_INDEX_BY_TYPE.Float8192+1)
 		self._from_float(value)
 
 	def _from_float(self, value: int = 0):
@@ -688,6 +719,7 @@ class Convert:
 
 class Types:
 	"""Simpler way to import, refer, check and hint to types"""
+	HashTable=HashTable
 	#? 64 bit
 	UInt8192 = UInt8192
 	UInt4096 = UInt4096
@@ -830,47 +862,47 @@ class Types:
 	class _MAX_BYTE_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta): # Make Immutable (unless you try WAY too hard but then its your problem)
 		# Declared initialized ∴ Enum
 		UInt8192   :Final[np.uint16] = 127
-		UInt4096   :Final[np.uint16] = 4095 # TODO: fill out the rest
-		UInt2048   :Final[np.uint16] = 2047
-		UInt1024   :Final[np.uint16] = 1023
-		UInt512    :Final[np.uint16] = 511
-		UInt256    :Final[np.uint16] = 255
-		UInt128    :Final[np.uint16] = 127
-		Int8192    :Final[np.uint16] = 8191
-		Int4096    :Final[np.uint16] = 4095
-		Int2048    :Final[np.uint16] = 2047
-		Int1024    :Final[np.uint16] = 1023
-		Int512     :Final[np.uint16] = 511
-		Int256     :Final[np.uint16] = 255
-		Int128     :Final[np.uint16] = 127
-		Float8192  :Final[np.uint16] = 8191
-		Float4096  :Final[np.uint16] = 4095
-		Float2048  :Final[np.uint16] = 2047
-		Float1024  :Final[np.uint16] = 1023
-		Float512   :Final[np.uint16] = 511
-		Float256   :Final[np.uint16] = 255
-		Float128   :Final[np.uint16] = 127
-		UInt8192H  :Final[np.uint16] = 8191
-		UInt4096H  :Final[np.uint16] = 4095
-		UInt2048H  :Final[np.uint16] = 2047
-		UInt1024H  :Final[np.uint16] = 1023
-		UInt512H   :Final[np.uint16] = 511
-		UInt256H   :Final[np.uint16] = 255
-		UInt128H   :Final[np.uint16] = 127
-		Int8192H   :Final[np.uint16] = 8191
-		Int4096H   :Final[np.uint16] = 4095
-		Int2048H   :Final[np.uint16] = 2047
-		Int1024H   :Final[np.uint16] = 1023
-		Int512H    :Final[np.uint16] = 511
-		Int256H    :Final[np.uint16] = 255
-		Int128H    :Final[np.uint16] = 127
-		Float8192H :Final[np.uint16] = 8191
-		Float4096H :Final[np.uint16] = 4095
-		Float2048H :Final[np.uint16] = 2047
-		Float1024H :Final[np.uint16] = 1023
-		Float512H  :Final[np.uint16] = 511
-		Float256H  :Final[np.uint16] = 255
-		Float128H  :Final[np.uint16] = 127
+		UInt4096   :Final[np.uint16] = 63
+		UInt2048   :Final[np.uint16] = 31
+		UInt1024   :Final[np.uint16] = 15
+		UInt512    :Final[np.uint16] = 7
+		UInt256    :Final[np.uint16] = 3
+		UInt128    :Final[np.uint16] = 1
+		Int8192    :Final[np.uint16] = 127
+		Int4096    :Final[np.uint16] = 63
+		Int2048    :Final[np.uint16] = 31
+		Int1024    :Final[np.uint16] = 15
+		Int512     :Final[np.uint16] = 7
+		Int256     :Final[np.uint16] = 3
+		Int128     :Final[np.uint16] = 1
+		Float8192  :Final[np.uint16] = 127
+		Float4096  :Final[np.uint16] = 63
+		Float2048  :Final[np.uint16] = 31
+		Float1024  :Final[np.uint16] = 15
+		Float512   :Final[np.uint16] = 7
+		Float256   :Final[np.uint16] = 3
+		Float128   :Final[np.uint16] = 1
+		UInt8192H  :Final[np.uint16] = 127
+		UInt4096H  :Final[np.uint16] = 63
+		UInt2048H  :Final[np.uint16] = 31
+		UInt1024H  :Final[np.uint16] = 15
+		UInt512H   :Final[np.uint16] = 7
+		UInt256H   :Final[np.uint16] = 3
+		UInt128H   :Final[np.uint16] = 1
+		Int8192H   :Final[np.uint16] = 127
+		Int4096H   :Final[np.uint16] = 63
+		Int2048H   :Final[np.uint16] = 31
+		Int1024H   :Final[np.uint16] = 15
+		Int512H    :Final[np.uint16] = 7
+		Int256H    :Final[np.uint16] = 3
+		Int128H    :Final[np.uint16] = 1
+		Float8192H :Final[np.uint16] = 127
+		Float4096H :Final[np.uint16] = 63
+		Float2048H :Final[np.uint16] = 31
+		Float1024H :Final[np.uint16] = 15
+		Float512H  :Final[np.uint16] = 7
+		Float256H  :Final[np.uint16] = 3
+		Float128H  :Final[np.uint16] = 1
 
 class MathF:
 	"""Functions and supporting variables"""
