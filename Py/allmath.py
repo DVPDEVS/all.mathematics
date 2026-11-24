@@ -392,15 +392,10 @@ class UInt8192:
 				return start + int(matches.argmax())
 		return None
 
-# TODO: #50 UINT 
-	def __contains__(self,
-			other: np.uint8|list[np.uint8]|tuple[np.uint8]|np.ndarray[np.uint8,np.uint8] = None
-			)->bool:
+	def __contains__(self, other: np.uint8 = None )->bool:
 		if other == None: raise TypeError("No value to check for was given")
 		elif type(other) == np.uint8:
 			return self._find_byte(other)
-		elif type(other) in (list, tuple, np.ndarray):
-			... # repeated search in the same way
 
 # TODO: #49 UINT 
 	def __copy__(self)->UInt8192:
