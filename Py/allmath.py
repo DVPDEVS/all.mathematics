@@ -37,12 +37,20 @@ class _ImmutableConstMeta(_ConstMeta):
 
 # Hash table
 class HashTable:
+	"""
+	Used for mapping values at a given index to that index
+	"""
 	__slots__ = ['size', 'hash_table']
-	def __init__(self, size):
-		self.size = size
-		self.hash_table = [[] for _ in range(size)]
+	def __init__(self, size: Types.uintsUnion64) -> None:
+		if size == 0:
+			raise ValueError("´size´ cannot be zero!")
+		self.size: Types.uintsUnion64 = size
+		self.hash_table: list[list[Types.allIntsUnion,Types.uintsUnion64]] = [[] for _ in range(size)]
 
-	def set_val(self, key, val):
+	def set_val(self,
+			key:Types.intsUnion64|Types.uintsUnion64, # value at index
+			val:Types.uintsUnion64 # index
+			) -> None:
 		hashed_key = hash(key) % self.size
 		bucket = self.hash_table[hashed_key]
 		for index, (record_key, _) in enumerate(bucket):
@@ -51,15 +59,14 @@ class HashTable:
 				return
 		bucket.append((key, val))
 
-	def get_val(self, key):
+	def get_val(self, key:Types.intsUnion64|Types.uintsUnion64) -> Types.uintsUnion64|None:
 		hashed_key = hash(key) % self.size
 		bucket = self.hash_table[hashed_key]
-		for record_key, record_val in bucket:
+		for record_key, record_val in bucket: # value, index of value
 			if record_key == key:
 				return record_val
-		return "No record found"
 
-	def delete_val(self, key):
+	def delete_val(self, key:Types.intsUnion64|Types.uintsUnion64) -> None:
 		hashed_key = hash(key) % self.size
 		bucket = self.hash_table[hashed_key]
 		for index, (record_key, _) in enumerate(bucket):
@@ -92,6 +99,11 @@ class UInt8192:
 		self.chunks = np.zeros(128, dtype=np.uint64)
 		self._hash_table = HashTable(Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1)
 		self._from_int(value)
+		self._update_hashmap()
+
+	def _update_hashmap(self):
+		for i in range(len(self.chunks)):
+			self._hash_table.set_val(self.chunks[i], i)
 
 	def _from_int(self, value: int = 0):
 		i=0
@@ -420,6 +432,7 @@ class UInt8192:
 			)->bool:
 		if other == None: raise TypeError("No value to check for was given")
 		elif type(other) == np.uint8:
+			expected_index = self._hash_table.get_val()
 			... #? basically index but the index value is the value were looking for instead of the position we're looking for D:
 			#! hashmap.
 			#? Gotta do this to check:
