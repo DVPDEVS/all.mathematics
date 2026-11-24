@@ -20,6 +20,7 @@
 #TODO: #82 Make all bools into np.uint8
 
 from __future__ import annotations # Treat type hints as strings/future types. this gets rid of 60+ errors per class
+import sys
 import numpy as np
 from typing import Union, Literal, Final
 from dataclasses import dataclass, fields
@@ -35,45 +36,6 @@ class _ImmutableConstMeta(_ConstMeta):
 			if isinstance(type(base), _ImmutableConstMeta): raise TypeError("Const classes cannot be subclassed")
 		super().__init__(*args, **kwargs)
 
-# Hash table
-class HashTable:
-	"""
-	Used for mapping values at a given index to that index
-	"""
-	__slots__ = ['size', 'hash_table']
-	def __init__(self, size: Types.uintsUnion64) -> None:
-		if size == 0:
-			raise ValueError("´size´ cannot be zero!")
-		self.size: Types.uintsUnion64 = size
-		self.hash_table: list[list[Types.allIntsUnion,Types.uintsUnion64]] = [[] for _ in range(size)]
-
-	def set_val(self,
-			key:Types.intsUnion64|Types.uintsUnion64, # value at index
-			val:Types.uintsUnion64 # index
-			) -> None:
-		hashed_key = hash(key) % self.size
-		bucket = self.hash_table[hashed_key]
-		for index, (record_key, _) in enumerate(bucket):
-			if record_key == key:
-				bucket[index] = (key, val)
-				return
-		bucket.append((key, val))
-
-	def get_val(self, key:Types.intsUnion64|Types.uintsUnion64) -> Types.uintsUnion64|None:
-		hashed_key = hash(key) % self.size
-		bucket = self.hash_table[hashed_key]
-		for record_key, record_val in bucket: # value, index of value
-			if record_key == key:
-				return record_val
-
-	def delete_val(self, key:Types.intsUnion64|Types.uintsUnion64) -> None:
-		hashed_key = hash(key) % self.size
-		bucket = self.hash_table[hashed_key]
-		for index, (record_key, _) in enumerate(bucket):
-			if record_key == key:
-				bucket.pop(index)
-				return
-
 # Custom type for storing 1024 byte unsigned integers
 class UInt8192:
 	"""This is a fixed-size unsigned 8192-bit integer type. It IMMEDIATELY takes 1KB of ram."""
@@ -82,7 +44,7 @@ class UInt8192:
 
 	MAX = (1 << 1024) -1
 
-	__slots__ = ['chunks', '_hash_table']
+	__slots__ = ['chunks', '_bytes']
 
 #! Avoiding subclassing int for the fine control applicable now :3
 #? (Im gonna have to create every magic method manually)
@@ -96,14 +58,9 @@ class UInt8192:
 #		return super().__new__(cls,value)
 
 	def __init__(self, value: int = 0):
-		self.chunks = np.zeros(128, dtype=np.uint64)
-		self._hash_table = HashTable(Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1)
+		self.chunks = np.zeros(128, dtype=Constants.DATATYPES._uint64_dtype,)
 		self._from_int(value)
-		self._update_hashmap()
-
-	def _update_hashmap(self):
-		for i in range(len(self.chunks)):
-			self._hash_table.set_val(self.chunks[i], i)
+		self._bytes = self.chunks.view(np.uint8) # view doesnt use additional ram
 
 	def _from_int(self, value: int = 0):
 		i=0
@@ -426,6 +383,15 @@ class UInt8192:
 				succ += self.__setitem__(np.uint32(idx))
 			return all(succ) if succ != () else False
 
+	def find_byte(self, value: np.uint8) -> int | None:
+		value = np.uint8(value)
+		for start in range(0, self._bytes.size, Constants.VECTORSEARCH_STEP):
+			block = self.bytes[start:start + Constants.VECTORSEARCH_STEP]
+			matches = block == value
+			if matches.any():
+				return start + int(matches.argmax())
+		return None
+
 # TODO: #50 UINT 
 	def __contains__(self,
 			other: np.uint8|list[np.uint8]|tuple[np.uint8]|np.ndarray[np.uint8,np.uint8] = None
@@ -460,11 +426,14 @@ class Float8192:
 	MAX = (1 << 1024) -1
 	__slots__ = ['mantissa', 'mantissa_signed', 'exponent', '_hash_table']
 
-	def __init__(self, value: int|Types.uintsUnion64|Types.uintsUnion32 = 0, *, precision: int|Types.uintsUnion64|Types.uintsUnion32 = 16):
-		self.mantissa = np.zeros(127, dtype=np.uint64)
+	def __init__(self,
+			value: int|Types.uintsUnion64|Types.uintsUnion32 = 0,
+			*,
+			precision: int|Types.uintsUnion64|Types.uintsUnion32 = 16
+			):
+		self.mantissa = np.zeros(127, dtype=Constants.DATATYPES._uint64_dtype)
 		self.mantissa_signed = np.int64(0)
 		self.exponent = np.uint16(precision)
-		self._hash_table = HashTable(Types._MAX_BYTE_INDEX_BY_TYPE.Float8192+1)
 		self._from_float(value)
 
 	def _from_float(self, value: int = 0):
@@ -732,7 +701,6 @@ class Convert:
 
 class Types:
 	"""Simpler way to import, refer, check and hint to types"""
-	HashTable=HashTable
 	#? 64 bit
 	UInt8192 = UInt8192
 	UInt4096 = UInt4096
@@ -825,8 +793,35 @@ class Types:
 	uinttypes32  = { np.uint8,   np.uint16,  np.uint32,  np.uintc                }
 	floattypes32 = { np.float16, np.float32, np.float64                          }
 
-	#? repurpose this
-	@dataclass(frozen=True, slots=True) # OOooOoOoooOohhhhHHHHHhHhhH so fancy you are now.
+class MathF:
+	"""Functions and supporting variables"""
+
+	def frexp(bigint: Types.bigIntsUnion64|Types.bigIntsUnion32)->tuple[np.ndarray[int, np.uint64|np.uint32], int]:
+		"""Convert a bigint type (this library's int and uint types) to a floating point type. Returns the mantissa and exponent, not an object."""
+		bitcount = len(bigint) #? ngl i barely know what this does
+		if bitcount == 0:
+			return bigint, 0
+		chunk_size = bigint.chunks.itemsize * 8
+		max_bits = len(bigint.chunks) * chunk_size
+		shift = max_bits - bitcount
+		normalized = bigint << shift
+		exponent = bitcount
+		return normalized, exponent
+
+@dataclass(frozen=True, slots=True)
+class Constants(metaclass=_ImmutableConstMeta):
+
+	SYS_BYTEORDER = sys.byteorder
+	VECTORSEARCH_STEP = 4096
+
+	class DATATYPES:
+		# LE Little Endian - regardless of sys order :: https://numpy.org/doc/stable/reference/generated/numpy.dtype.newbyteorder.html 
+		_uint64_dtype: np.dtype[np.uint64] = np.dtype.newbyteorder(np.uint64, '<')
+		_int64_dtype: np.dtype[np.int64] = np.dtype.newbyteorder(np.int64, '<')
+		_uint64_dtype: np.dtype[np.uint64] = np.dtype.newbyteorder(np.uint32, '<')
+		_int64_dtype: np.dtype[np.int64] = np.dtype.newbyteorder(np.int32, '<')
+
+	@dataclass(frozen=True, slots=True)
 	class _MAX_BIT_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta): # Make Immutable (unless you try WAY too hard but then its your problem)
 		# Declared initialized ∴ Enum
 		UInt8192   :Final[np.uint16] = 8191
@@ -871,8 +866,9 @@ class Types:
 		Float512H  :Final[np.uint16] = 511
 		Float256H  :Final[np.uint16] = 255
 		Float128H  :Final[np.uint16] = 127
-	@dataclass(frozen=True, slots=True) # OOooOoOoooOohhhhHHHHHhHhhH so fancy you are now.
-	class _MAX_BYTE_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta): # Make Immutable (unless you try WAY too hard but then its your problem)
+
+	@dataclass(frozen=True, slots=True)
+	class _MAX_BYTE_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta):
 		# Declared initialized ∴ Enum
 		UInt8192   :Final[np.uint16] = 127
 		UInt4096   :Final[np.uint16] = 63
@@ -916,20 +912,3 @@ class Types:
 		Float512H  :Final[np.uint16] = 7
 		Float256H  :Final[np.uint16] = 3
 		Float128H  :Final[np.uint16] = 1
-
-class MathF:
-	"""Functions and supporting variables"""
-
-	def frexp(bigint: Types.bigIntsUnion64|Types.bigIntsUnion32)->tuple[np.ndarray[int, np.uint64|np.uint32], int]:
-		"""Convert a bigint type (this library's int and uint types) to a floating point type. Returns the mantissa and exponent, not an object."""
-		bitcount = len(bigint) #? ngl i barely know what this does
-		if bitcount == 0:
-			return bigint, 0
-		chunk_size = bigint.chunks.itemsize * 8
-		max_bits = len(bigint.chunks) * chunk_size
-		shift = max_bits - bitcount
-		normalized = bigint << shift
-		exponent = bitcount
-		return normalized, exponent
-
-
