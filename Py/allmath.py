@@ -281,37 +281,37 @@ class UInt8192:
 		return self
 
 	def __eq__(self, other: UInt8192)->bool: # equal
-		for i in range(Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+		for i in range(Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
 			if self.chunks[i] != other.chunks[i]:
 				return False
 		return True
 
 	def __ne__(self, other: UInt8192)->bool: # not equal
-		for i in range(Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+		for i in range(Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
 			if self.chunks[i] == other.chunks[i]:
 				return False
 		return True
 
 	def __lt__(self, other: UInt8192)->bool: # less than
-		for i in range(Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+		for i in range(Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
 			if self.chunks[i] >= other.chunks[i]:
 				return False
 		return True
 
 	def __le__(self, other: UInt8192)->bool: # less than or equal
-		for i in range(Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+		for i in range(Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
 			if self.chunks[i] > other.chunks[i]:
 				return False
 		return True
 
 	def __gt__(self, other: UInt8192)->bool: # greater than
-		for i in range(Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+		for i in range(Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
 			if self.chunks[i] <= other.chunks[i]:
 				return False
 		return True
 
 	def __ge__(self, other: UInt8192)->bool: # greater than or equal
-		for i in range(Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+		for i in range(Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
 			if self.chunks[i] < other.chunks[i]:
 				return False
 		return True
@@ -340,7 +340,7 @@ class UInt8192:
 		Return a single `np.uint8` or a generic 1D `np.ndarray(shape=tuple[int], dtype=np.uint8)`
 		"""
 		if type(index) == np.uint32:
-			if index > Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192:
+			if index > Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192:
 				raise IndexError(f'Index {index} is out of range for UInt8192')
 			else:
 				number :np.uint64 = np.uint64(index) % 8 # which byte
@@ -351,7 +351,7 @@ class UInt8192:
 			arr :list[np.uint8]= []
 			for idx in range(
 					0 if not index[0] else index[0],
-					Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
+					Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
 					1 if not index[2] else index[2]
 				): arr.append(self.__getitem__(np.uint32(idx)))
 			return np.arr(arr, np.uint8)
@@ -361,7 +361,7 @@ class UInt8192:
 			value: Types.allUIntsUnion
 			)-> bool:
 		if type(index) == np.uint32: # single byte index assignment
-			if index > Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192:
+			if index > Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192:
 				raise IndexError(f'Index {index} is out of range for UInt8192')
 			else:
 				number :np.uint64 = np.uint64(index) % 8 # which byte
@@ -377,13 +377,13 @@ class UInt8192:
 			succ: set[bool] = ()
 			for idx in range(
 					0 if not index[0] else index[0],
-					Types._MAX_BYTE_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
+					Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
 					1 if not index[2] else index[2]
 				):
 				succ += self.__setitem__(np.uint32(idx))
 			return all(succ) if succ != () else False
 
-	def find_byte(self, value: np.uint8) -> int | None:
+	def _find_byte(self, value: np.uint8) -> int | None:
 		value = np.uint8(value)
 		for start in range(0, self._bytes.size, Constants.VECTORSEARCH_STEP):
 			block = self.bytes[start:start + Constants.VECTORSEARCH_STEP]
@@ -398,12 +398,7 @@ class UInt8192:
 			)->bool:
 		if other == None: raise TypeError("No value to check for was given")
 		elif type(other) == np.uint8:
-			expected_index = self._hash_table.get_val()
-			... #? basically index but the index value is the value were looking for instead of the position we're looking for D:
-			#! hashmap.
-			#? Gotta do this to check:
-			if ... == other: return True
-			other <<= ('some value based on other`s index type') 
+			return self._find_byte(other)
 		elif type(other) in (list, tuple, np.ndarray):
 			... # repeated search in the same way
 
@@ -809,7 +804,7 @@ class MathF:
 		return normalized, exponent
 
 @dataclass(frozen=True, slots=True)
-class Constants(metaclass=_ImmutableConstMeta):
+class Constants(metaclass=_ImmutableConstMeta): # Make Immutable (unless you try WAY too hard but then its your problem)
 
 	SYS_BYTEORDER = sys.byteorder
 	VECTORSEARCH_STEP = 4096
@@ -822,7 +817,7 @@ class Constants(metaclass=_ImmutableConstMeta):
 		_int64_dtype: np.dtype[np.int64] = np.dtype.newbyteorder(np.int32, '<')
 
 	@dataclass(frozen=True, slots=True)
-	class _MAX_BIT_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta): # Make Immutable (unless you try WAY too hard but then its your problem)
+	class _MAX_BIT_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta):
 		# Declared initialized ∴ Enum
 		UInt8192   :Final[np.uint16] = 8191
 		UInt4096   :Final[np.uint16] = 4095
