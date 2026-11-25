@@ -23,6 +23,7 @@ from __future__ import annotations # Treat type hints as strings/future types. t
 import sys
 import numpy as np
 from typing import Union, Literal, Final
+from types import SimpleNamespace
 from dataclasses import dataclass, fields
 
 # Meta Immutability classes
@@ -58,7 +59,7 @@ class UInt8192:
 #		return super().__new__(cls,value)
 
 	def __init__(self, value: int = 0):
-		self.chunks = np.zeros(128, dtype=Constants.DATATYPES._uint64_dtype,)
+		self.chunks = np.zeros(128, dtype=Constants.DATATYPES.uint64_dtype,)
 		self._from_int(value)
 		self._bytes = self.chunks.view(np.uint8) # view doesnt use additional ram
 
@@ -421,7 +422,7 @@ class Float8192:
 			*,
 			precision: int|Types.uintsUnion64|Types.uintsUnion32 = 16
 			):
-		self.mantissa = np.zeros(127, dtype=Constants.DATATYPES._uint64_dtype)
+		self.mantissa = np.zeros(127, dtype=Constants.DATATYPES.uint64_dtype)
 		self.mantissa_signed = np.int64(0)
 		self.exponent = np.uint16(precision)
 		self._from_float(value)
@@ -801,15 +802,23 @@ class MathF:
 @dataclass(frozen=True, slots=True)
 class Constants(metaclass=_ImmutableConstMeta): # Make Immutable (unless you try WAY too hard but then its your problem)
 
-	SYS_BYTEORDER = sys.byteorder
-	VECTORSEARCH_STEP = 4096
+	SYS_BYTEORDER: str = sys.byteorder
+	ENFORCED_BYTEORDER: str = 'little'
+	VECTORSEARCH_STEP: int = 4096
 
-	class DATATYPES:
-		# LE Little Endian - regardless of sys order :: https://numpy.org/doc/stable/reference/generated/numpy.dtype.newbyteorder.html 
-		_uint64_dtype: np.dtype[np.uint64] = np.dtype.newbyteorder(np.uint64, '<')
-		_int64_dtype: np.dtype[np.int64] = np.dtype.newbyteorder(np.int64, '<')
-		_uint64_dtype: np.dtype[np.uint64] = np.dtype.newbyteorder(np.uint32, '<')
-		_int64_dtype: np.dtype[np.int64] = np.dtype.newbyteorder(np.int32, '<')
+	DATATYPES: object = (
+		lambda order=ENFORCED_BYTEORDER: type("DATATYPES", (SimpleNamespace), { #* construction with lambda in order to pass in the byteorder
+				"__doc__": (
+					"NumPy dtypes used by the vector-search layer.\n\n"
+					"All dtypes' endianness is enforced by `Constants.ENFORCED_BYTEORDER` at compile time,\n"
+					"independent of the host platform byte order."
+				),},)(
+			# Endianness is forced to little by default, regardless of sys order :: https://numpy.org/doc/stable/reference/generated/numpy.dtype.newbyteorder.html
+			uint64_dtype = np.dtype(np.uint64).newbyteorder(order),
+			int64_dtype  = np.dtype(np.int64).newbyteorder(order),
+			uint32_dtype = np.dtype(np.uint32).newbyteorder(order),
+			int32_dtype  = np.dtype(np.int32).newbyteorder(order),
+		))()
 
 	@dataclass(frozen=True, slots=True)
 	class _MAX_BIT_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta):
@@ -902,3 +911,5 @@ class Constants(metaclass=_ImmutableConstMeta): # Make Immutable (unless you try
 		Float512H  :Final[np.uint16] = 7
 		Float256H  :Final[np.uint16] = 3
 		Float128H  :Final[np.uint16] = 1
+
+
