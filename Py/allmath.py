@@ -59,14 +59,14 @@ class UInt8192:
 #		return super().__new__(cls,value)
 
 	def __init__(self, value: int = 0):
-		self.chunks = np.zeros(128, dtype=Constants.DATATYPES.uint64_dtype,)
+		self.chunks: np.ndarray[tuple[int], np.dtype[np.uint64]] = np.zeros(128, dtype=Constants.DATATYPES.uint64_dtype,)
 		self._from_int(value)
-		self._bytes = self.chunks.view(np.uint8) # view doesnt use additional ram
+		self._bytes: np.ndarray[tuple[int], np.dtype[np.uint8]] = self.chunks.view(Constants.DATATYPES.uint8_dtype) # view doesnt use additional ram
 
 	def _from_int(self, value: int = 0):
 		i=0
-		while value > 0 and i < 128:
-			self.chunks[i] = value & 0xFFFFFFFFFFFFFFFF
+		while value > 0 and i <= Constants.MAX_CHUNK_INDEX_BY_TYPE.UInt8192:
+			self.chunks[i] = value & Constants.CHUNK_MASK_BY_TYPE.UInt8192
 			value >>= 64
 			i += 1
 
@@ -282,37 +282,37 @@ class UInt8192:
 		return self
 
 	def __eq__(self, other: UInt8192)->bool: # equal
-		for i in range(Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+		for i in range(Constants.MAX_CHUNK_INDEX_BY_TYPE.UInt8192+1):
 			if self.chunks[i] != other.chunks[i]:
 				return False
 		return True
 
 	def __ne__(self, other: UInt8192)->bool: # not equal
-		for i in range(Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+		for i in range(Constants.MAX_CHUNK_INDEX_BY_TYPE.UInt8192+1):
 			if self.chunks[i] == other.chunks[i]:
 				return False
 		return True
 
 	def __lt__(self, other: UInt8192)->bool: # less than
-		for i in range(Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+		for i in range(Constants.MAX_CHUNK_INDEX_BY_TYPE.UInt8192+1):
 			if self.chunks[i] >= other.chunks[i]:
 				return False
 		return True
 
 	def __le__(self, other: UInt8192)->bool: # less than or equal
-		for i in range(Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+		for i in range(Constants.MAX_CHUNK_INDEX_BY_TYPE.UInt8192+1):
 			if self.chunks[i] > other.chunks[i]:
 				return False
 		return True
 
 	def __gt__(self, other: UInt8192)->bool: # greater than
-		for i in range(Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+		for i in range(Constants.MAX_CHUNK_INDEX_BY_TYPE.UInt8192+1):
 			if self.chunks[i] <= other.chunks[i]:
 				return False
 		return True
 
 	def __ge__(self, other: UInt8192)->bool: # greater than or equal
-		for i in range(Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192+1):
+		for i in range(Constants.MAX_CHUNK_INDEX_BY_TYPE.UInt8192+1):
 			if self.chunks[i] < other.chunks[i]:
 				return False
 		return True
@@ -341,7 +341,7 @@ class UInt8192:
 		Return a single `np.uint8` or a generic 1D `np.ndarray(shape=tuple[int], dtype=np.uint8)`
 		"""
 		if type(index) == np.uint32:
-			if index > Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192:
+			if index > Constants.MAX_BYTE_INDEX_BY_TYPE.UInt8192:
 				raise IndexError(f'Index {index} is out of range for UInt8192')
 			else:
 				number :np.uint64 = np.uint64(index) % 8 # which byte
@@ -352,7 +352,7 @@ class UInt8192:
 			arr :list[np.uint8]= []
 			for idx in range(
 					0 if not index[0] else index[0],
-					Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
+					Constants.MAX_BYTE_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
 					1 if not index[2] else index[2]
 				): arr.append(self.__getitem__(np.uint32(idx)))
 			return np.arr(arr, np.uint8)
@@ -362,7 +362,7 @@ class UInt8192:
 			value: Types.allUIntsUnion
 			)-> bool:
 		if type(index) == np.uint32: # single byte index assignment
-			if index > Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192:
+			if index > Constants.MAX_BYTE_INDEX_BY_TYPE.UInt8192:
 				raise IndexError(f'Index {index} is out of range for UInt8192')
 			else:
 				number :np.uint64 = np.uint64(index) % 8 # which byte
@@ -378,7 +378,7 @@ class UInt8192:
 			succ: set[bool] = ()
 			for idx in range(
 					0 if not index[0] else index[0],
-					Constants._MAX_BYTE_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
+					Constants.MAX_BYTE_INDEX_BY_TYPE.UInt8192 if not index[1] else index[1],
 					1 if not index[2] else index[2]
 				):
 				succ += self.__setitem__(np.uint32(idx))
@@ -808,6 +808,8 @@ def _mk_constants():
 		int64_dtype:  ClassVar[np.dtype[np.int64]] = (np.dtype(np.int64).newbyteorder(__O))
 		uint32_dtype: ClassVar[np.dtype[np.uint32]] = (np.dtype(np.uint32).newbyteorder(__O))
 		int32_dtype:  ClassVar[np.dtype[np.int32]] = (np.dtype(np.int32).newbyteorder(__O))
+		uint8_dtype: ClassVar[np.dtype[np.uint8]] = (np.dtype(np.uint8).newbyteorder(__O))
+		int8_dtype:  ClassVar[np.dtype[np.int8]] = (np.dtype(np.int8).newbyteorder(__O))
 
 	@dataclass(frozen=True, slots=True)
 	class Constants(metaclass=_ImmutableConstMeta):
@@ -822,7 +824,7 @@ def _mk_constants():
 		DATATYPES: ClassVar[type[DataTypes]] = DataTypes
 
 		@dataclass(frozen=True, slots=True)
-		class _MAX_BIT_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta):
+		class MAX_BIT_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta):
 			# Declared initialized ∴ Enum
 			UInt8192   :Final[np.uint16] = 8191
 			UInt4096   :Final[np.uint16] = 4095
@@ -868,7 +870,53 @@ def _mk_constants():
 			Float128H  :Final[np.uint16] = 127
 
 		@dataclass(frozen=True, slots=True)
-		class _MAX_BYTE_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta):
+		class MAX_BYTE_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta):
+			# Declared initialized ∴ Enum
+			UInt8192   :Final[np.uint16] = 1023 #TODO: update the rest
+			UInt4096   :Final[np.uint16] = 63
+			UInt2048   :Final[np.uint16] = 31
+			UInt1024   :Final[np.uint16] = 15
+			UInt512    :Final[np.uint16] = 7
+			UInt256    :Final[np.uint16] = 3
+			UInt128    :Final[np.uint16] = 1
+			Int8192    :Final[np.uint16] = 127
+			Int4096    :Final[np.uint16] = 63
+			Int2048    :Final[np.uint16] = 31
+			Int1024    :Final[np.uint16] = 15
+			Int512     :Final[np.uint16] = 7
+			Int256     :Final[np.uint16] = 3
+			Int128     :Final[np.uint16] = 1
+			Float8192  :Final[np.uint16] = 127
+			Float4096  :Final[np.uint16] = 63
+			Float2048  :Final[np.uint16] = 31
+			Float1024  :Final[np.uint16] = 15
+			Float512   :Final[np.uint16] = 7
+			Float256   :Final[np.uint16] = 3
+			Float128   :Final[np.uint16] = 1
+			UInt8192H  :Final[np.uint16] = 127
+			UInt4096H  :Final[np.uint16] = 63
+			UInt2048H  :Final[np.uint16] = 31
+			UInt1024H  :Final[np.uint16] = 15
+			UInt512H   :Final[np.uint16] = 7
+			UInt256H   :Final[np.uint16] = 3
+			UInt128H   :Final[np.uint16] = 1
+			Int8192H   :Final[np.uint16] = 127
+			Int4096H   :Final[np.uint16] = 63
+			Int2048H   :Final[np.uint16] = 31
+			Int1024H   :Final[np.uint16] = 15
+			Int512H    :Final[np.uint16] = 7
+			Int256H    :Final[np.uint16] = 3
+			Int128H    :Final[np.uint16] = 1
+			Float8192H :Final[np.uint16] = 127
+			Float4096H :Final[np.uint16] = 63
+			Float2048H :Final[np.uint16] = 31
+			Float1024H :Final[np.uint16] = 15
+			Float512H  :Final[np.uint16] = 7
+			Float256H  :Final[np.uint16] = 3
+			Float128H  :Final[np.uint16] = 1
+
+		@dataclass(frozen=True, slots=True)
+		class MAX_CHUNK_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta):
 			# Declared initialized ∴ Enum
 			UInt8192   :Final[np.uint16] = 127
 			UInt4096   :Final[np.uint16] = 63
@@ -912,6 +960,52 @@ def _mk_constants():
 			Float512H  :Final[np.uint16] = 7
 			Float256H  :Final[np.uint16] = 3
 			Float128H  :Final[np.uint16] = 1
+
+		@dataclass(frozen=True, slots=True)
+		class CHUNK_MASK_BY_TYPE(metaclass=_ImmutableConstMeta):
+			# Declared initialized ∴ Enum
+			UInt8192   :Final[np.uint64] = 0xFFFFFFFFFFFFFFFF
+			UInt4096   :Final[np.uint64] = 63
+			UInt2048   :Final[np.uint64] = 31
+			UInt1024   :Final[np.uint64] = 15
+			UInt512    :Final[np.uint64] = 7
+			UInt256    :Final[np.uint64] = 3
+			UInt128    :Final[np.uint64] = 1
+			Int8192    :Final[np.uint64] = 127
+			Int4096    :Final[np.uint64] = 63
+			Int2048    :Final[np.uint64] = 31
+			Int1024    :Final[np.uint64] = 15
+			Int512     :Final[np.uint64] = 7
+			Int256     :Final[np.uint64] = 3
+			Int128     :Final[np.uint64] = 1
+			Float8192  :Final[np.uint64] = 127
+			Float4096  :Final[np.uint64] = 63
+			Float2048  :Final[np.uint64] = 31
+			Float1024  :Final[np.uint64] = 15
+			Float512   :Final[np.uint64] = 7
+			Float256   :Final[np.uint64] = 3
+			Float128   :Final[np.uint64] = 1
+			UInt8192H  :Final[np.uint32] = 127
+			UInt4096H  :Final[np.uint32] = 63
+			UInt2048H  :Final[np.uint32] = 31
+			UInt1024H  :Final[np.uint32] = 15
+			UInt512H   :Final[np.uint32] = 7
+			UInt256H   :Final[np.uint32] = 3
+			UInt128H   :Final[np.uint32] = 1
+			Int8192H   :Final[np.uint32] = 127
+			Int4096H   :Final[np.uint32] = 63
+			Int2048H   :Final[np.uint32] = 31
+			Int1024H   :Final[np.uint32] = 15
+			Int512H    :Final[np.uint32] = 7
+			Int256H    :Final[np.uint32] = 3
+			Int128H    :Final[np.uint32] = 1
+			Float8192H :Final[np.uint32] = 127
+			Float4096H :Final[np.uint32] = 63
+			Float2048H :Final[np.uint32] = 31
+			Float1024H :Final[np.uint32] = 15
+			Float512H  :Final[np.uint32] = 7
+			Float256H  :Final[np.uint32] = 3
+			Float128H  :Final[np.uint32] = 1
 
 	return Constants
 
