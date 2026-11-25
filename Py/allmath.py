@@ -22,8 +22,8 @@
 from __future__ import annotations # Treat type hints as strings/future types. this gets rid of 60+ errors per class
 import sys
 import numpy as np
-from typing import Union, Literal, Final
-from types import SimpleNamespace
+from typing import Union, Literal, Final, ClassVar
+# from types import SimpleNamespace
 from dataclasses import dataclass, fields
 
 # Meta Immutability classes
@@ -799,117 +799,127 @@ class MathF:
 		exponent = bitcount
 		return normalized, exponent
 
-@dataclass(frozen=True, slots=True)
-class Constants(metaclass=_ImmutableConstMeta): # Make Immutable (unless you try WAY too hard but then its your problem)
-
-	SYS_BYTEORDER: str = sys.byteorder
-	ENFORCED_BYTEORDER: str = 'little'
-	VECTORSEARCH_STEP: int = 4096
-
-	DATATYPES: object = (
-		lambda order=ENFORCED_BYTEORDER: type("DATATYPES", (SimpleNamespace), { #* construction with lambda in order to pass in the byteorder
-				"__doc__": (
-					"NumPy dtypes used by the vector-search layer.\n\n"
-					"All dtypes' endianness is enforced by `Constants.ENFORCED_BYTEORDER` at compile time,\n"
-					"independent of the host platform byte order."
-				),},)(
-			# Endianness is forced to little by default, regardless of sys order :: https://numpy.org/doc/stable/reference/generated/numpy.dtype.newbyteorder.html
-			uint64_dtype = np.dtype(np.uint64).newbyteorder(order),
-			int64_dtype  = np.dtype(np.int64).newbyteorder(order),
-			uint32_dtype = np.dtype(np.uint32).newbyteorder(order),
-			int32_dtype  = np.dtype(np.int32).newbyteorder(order),
-		))()
+def _mk_constants():
+	__O: str = 'little'
 
 	@dataclass(frozen=True, slots=True)
-	class _MAX_BIT_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta):
-		# Declared initialized ∴ Enum
-		UInt8192   :Final[np.uint16] = 8191
-		UInt4096   :Final[np.uint16] = 4095
-		UInt2048   :Final[np.uint16] = 2047
-		UInt1024   :Final[np.uint16] = 1023
-		UInt512    :Final[np.uint16] = 511
-		UInt256    :Final[np.uint16] = 255
-		UInt128    :Final[np.uint16] = 127
-		Int8192    :Final[np.uint16] = 8191
-		Int4096    :Final[np.uint16] = 4095
-		Int2048    :Final[np.uint16] = 2047
-		Int1024    :Final[np.uint16] = 1023
-		Int512     :Final[np.uint16] = 511
-		Int256     :Final[np.uint16] = 255
-		Int128     :Final[np.uint16] = 127
-		Float8192  :Final[np.uint16] = 8191
-		Float4096  :Final[np.uint16] = 4095
-		Float2048  :Final[np.uint16] = 2047
-		Float1024  :Final[np.uint16] = 1023
-		Float512   :Final[np.uint16] = 511
-		Float256   :Final[np.uint16] = 255
-		Float128   :Final[np.uint16] = 127
-		UInt8192H  :Final[np.uint16] = 8191
-		UInt4096H  :Final[np.uint16] = 4095
-		UInt2048H  :Final[np.uint16] = 2047
-		UInt1024H  :Final[np.uint16] = 1023
-		UInt512H   :Final[np.uint16] = 511
-		UInt256H   :Final[np.uint16] = 255
-		UInt128H   :Final[np.uint16] = 127
-		Int8192H   :Final[np.uint16] = 8191
-		Int4096H   :Final[np.uint16] = 4095
-		Int2048H   :Final[np.uint16] = 2047
-		Int1024H   :Final[np.uint16] = 1023
-		Int512H    :Final[np.uint16] = 511
-		Int256H    :Final[np.uint16] = 255
-		Int128H    :Final[np.uint16] = 127
-		Float8192H :Final[np.uint16] = 8191
-		Float4096H :Final[np.uint16] = 4095
-		Float2048H :Final[np.uint16] = 2047
-		Float1024H :Final[np.uint16] = 1023
-		Float512H  :Final[np.uint16] = 511
-		Float256H  :Final[np.uint16] = 255
-		Float128H  :Final[np.uint16] = 127
+	class DataTypes(metaclass=_ImmutableConstMeta):
+		"""
+		NumPy dtypes used by the vector-search layer.\n  
+		All dtypes' endianness is enforced by `Constants.ENFORCED_BYTEORDER` at compile time, independent of the host platform byte order.
+		"""
+		# Endianness is forced to little by default, regardless of sys order :: https://numpy.org/doc/stable/reference/generated/numpy.dtype.newbyteorder.html
+		uint64_dtype: ClassVar[np.dtype[np.uint64]] = (np.dtype(np.uint64).newbyteorder(__O))
+		int64_dtype:  ClassVar[np.dtype[np.int64]] = (np.dtype(np.int64).newbyteorder(__O))
+		uint32_dtype: ClassVar[np.dtype[np.uint32]] = (np.dtype(np.uint32).newbyteorder(__O))
+		int32_dtype:  ClassVar[np.dtype[np.int32]] = (np.dtype(np.int32).newbyteorder(__O))
 
 	@dataclass(frozen=True, slots=True)
-	class _MAX_BYTE_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta):
-		# Declared initialized ∴ Enum
-		UInt8192   :Final[np.uint16] = 127
-		UInt4096   :Final[np.uint16] = 63
-		UInt2048   :Final[np.uint16] = 31
-		UInt1024   :Final[np.uint16] = 15
-		UInt512    :Final[np.uint16] = 7
-		UInt256    :Final[np.uint16] = 3
-		UInt128    :Final[np.uint16] = 1
-		Int8192    :Final[np.uint16] = 127
-		Int4096    :Final[np.uint16] = 63
-		Int2048    :Final[np.uint16] = 31
-		Int1024    :Final[np.uint16] = 15
-		Int512     :Final[np.uint16] = 7
-		Int256     :Final[np.uint16] = 3
-		Int128     :Final[np.uint16] = 1
-		Float8192  :Final[np.uint16] = 127
-		Float4096  :Final[np.uint16] = 63
-		Float2048  :Final[np.uint16] = 31
-		Float1024  :Final[np.uint16] = 15
-		Float512   :Final[np.uint16] = 7
-		Float256   :Final[np.uint16] = 3
-		Float128   :Final[np.uint16] = 1
-		UInt8192H  :Final[np.uint16] = 127
-		UInt4096H  :Final[np.uint16] = 63
-		UInt2048H  :Final[np.uint16] = 31
-		UInt1024H  :Final[np.uint16] = 15
-		UInt512H   :Final[np.uint16] = 7
-		UInt256H   :Final[np.uint16] = 3
-		UInt128H   :Final[np.uint16] = 1
-		Int8192H   :Final[np.uint16] = 127
-		Int4096H   :Final[np.uint16] = 63
-		Int2048H   :Final[np.uint16] = 31
-		Int1024H   :Final[np.uint16] = 15
-		Int512H    :Final[np.uint16] = 7
-		Int256H    :Final[np.uint16] = 3
-		Int128H    :Final[np.uint16] = 1
-		Float8192H :Final[np.uint16] = 127
-		Float4096H :Final[np.uint16] = 63
-		Float2048H :Final[np.uint16] = 31
-		Float1024H :Final[np.uint16] = 15
-		Float512H  :Final[np.uint16] = 7
-		Float256H  :Final[np.uint16] = 3
-		Float128H  :Final[np.uint16] = 1
+	class Constants(metaclass=_ImmutableConstMeta):
+		"""
+		Constants used for indexing, data types, etc.
+		"""
+
+		SYS_BYTEORDER: str = sys.byteorder
+		ENFORCED_BYTEORDER: str = __O
+		VECTORSEARCH_STEP: int = 4096
+
+		DATATYPES: ClassVar[type[DataTypes]] = DataTypes
+
+		@dataclass(frozen=True, slots=True)
+		class _MAX_BIT_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta):
+			# Declared initialized ∴ Enum
+			UInt8192   :Final[np.uint16] = 8191
+			UInt4096   :Final[np.uint16] = 4095
+			UInt2048   :Final[np.uint16] = 2047
+			UInt1024   :Final[np.uint16] = 1023
+			UInt512    :Final[np.uint16] = 511
+			UInt256    :Final[np.uint16] = 255
+			UInt128    :Final[np.uint16] = 127
+			Int8192    :Final[np.uint16] = 8191
+			Int4096    :Final[np.uint16] = 4095
+			Int2048    :Final[np.uint16] = 2047
+			Int1024    :Final[np.uint16] = 1023
+			Int512     :Final[np.uint16] = 511
+			Int256     :Final[np.uint16] = 255
+			Int128     :Final[np.uint16] = 127
+			Float8192  :Final[np.uint16] = 8191
+			Float4096  :Final[np.uint16] = 4095
+			Float2048  :Final[np.uint16] = 2047
+			Float1024  :Final[np.uint16] = 1023
+			Float512   :Final[np.uint16] = 511
+			Float256   :Final[np.uint16] = 255
+			Float128   :Final[np.uint16] = 127
+			UInt8192H  :Final[np.uint16] = 8191
+			UInt4096H  :Final[np.uint16] = 4095
+			UInt2048H  :Final[np.uint16] = 2047
+			UInt1024H  :Final[np.uint16] = 1023
+			UInt512H   :Final[np.uint16] = 511
+			UInt256H   :Final[np.uint16] = 255
+			UInt128H   :Final[np.uint16] = 127
+			Int8192H   :Final[np.uint16] = 8191
+			Int4096H   :Final[np.uint16] = 4095
+			Int2048H   :Final[np.uint16] = 2047
+			Int1024H   :Final[np.uint16] = 1023
+			Int512H    :Final[np.uint16] = 511
+			Int256H    :Final[np.uint16] = 255
+			Int128H    :Final[np.uint16] = 127
+			Float8192H :Final[np.uint16] = 8191
+			Float4096H :Final[np.uint16] = 4095
+			Float2048H :Final[np.uint16] = 2047
+			Float1024H :Final[np.uint16] = 1023
+			Float512H  :Final[np.uint16] = 511
+			Float256H  :Final[np.uint16] = 255
+			Float128H  :Final[np.uint16] = 127
+
+		@dataclass(frozen=True, slots=True)
+		class _MAX_BYTE_INDEX_BY_TYPE(metaclass=_ImmutableConstMeta):
+			# Declared initialized ∴ Enum
+			UInt8192   :Final[np.uint16] = 127
+			UInt4096   :Final[np.uint16] = 63
+			UInt2048   :Final[np.uint16] = 31
+			UInt1024   :Final[np.uint16] = 15
+			UInt512    :Final[np.uint16] = 7
+			UInt256    :Final[np.uint16] = 3
+			UInt128    :Final[np.uint16] = 1
+			Int8192    :Final[np.uint16] = 127
+			Int4096    :Final[np.uint16] = 63
+			Int2048    :Final[np.uint16] = 31
+			Int1024    :Final[np.uint16] = 15
+			Int512     :Final[np.uint16] = 7
+			Int256     :Final[np.uint16] = 3
+			Int128     :Final[np.uint16] = 1
+			Float8192  :Final[np.uint16] = 127
+			Float4096  :Final[np.uint16] = 63
+			Float2048  :Final[np.uint16] = 31
+			Float1024  :Final[np.uint16] = 15
+			Float512   :Final[np.uint16] = 7
+			Float256   :Final[np.uint16] = 3
+			Float128   :Final[np.uint16] = 1
+			UInt8192H  :Final[np.uint16] = 127
+			UInt4096H  :Final[np.uint16] = 63
+			UInt2048H  :Final[np.uint16] = 31
+			UInt1024H  :Final[np.uint16] = 15
+			UInt512H   :Final[np.uint16] = 7
+			UInt256H   :Final[np.uint16] = 3
+			UInt128H   :Final[np.uint16] = 1
+			Int8192H   :Final[np.uint16] = 127
+			Int4096H   :Final[np.uint16] = 63
+			Int2048H   :Final[np.uint16] = 31
+			Int1024H   :Final[np.uint16] = 15
+			Int512H    :Final[np.uint16] = 7
+			Int256H    :Final[np.uint16] = 3
+			Int128H    :Final[np.uint16] = 1
+			Float8192H :Final[np.uint16] = 127
+			Float4096H :Final[np.uint16] = 63
+			Float2048H :Final[np.uint16] = 31
+			Float1024H :Final[np.uint16] = 15
+			Float512H  :Final[np.uint16] = 7
+			Float256H  :Final[np.uint16] = 3
+			Float128H  :Final[np.uint16] = 1
+
+	return Constants
+
+Constants = _mk_constants()
 
 
