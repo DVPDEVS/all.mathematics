@@ -637,7 +637,6 @@ class Float8192:
 	def __sizeof__(self)->int:
 		return self
 
-
 class Convert:
 	"""Conversion mainly between bases and types"""
 
@@ -685,7 +684,6 @@ class Convert:
 		#? fallback approximation
 		b05 = (encoded_digits * np.uint64(1 << max_precision)) // power_10
 		return type(encoded_digits)(b05), type(encoded_digits)(max_precision)
-
 
 class Types:
 	"""Simpler way to import, refer, check and hint to types"""
